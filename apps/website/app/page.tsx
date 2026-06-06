@@ -15,12 +15,12 @@ export default function Home() {
             <span className="font-bold text-xl tracking-tight">ZeroTrust<span className="text-indigo-500">Agents</span></span>
           </div>
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="https://github.com/lokeshsk/zerotrust-agents" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+            <a href="#features" className="hover:text-white transition-colors cursor-pointer">Features</a>
+            <a href="#pricing" className="hover:text-white transition-colors cursor-pointer">Pricing</a>
+            <a href="https://github.com/lokeshsk/zerotrust-agents" target="_blank" rel="noreferrer" className="hover:text-white transition-colors cursor-pointer">GitHub</a>
           </div>
           <div>
-            <a href="mailto:hello@zerotrust-agents.com?subject=SaaS%20Waitlist" className="px-5 py-2.5 bg-white/10 text-white border border-white/20 rounded-full font-semibold hover:bg-white/20 transition-colors text-sm">
+            <a href="mailto:hello@zerotrust-agents.com?subject=SaaS%20Waitlist" className="px-5 py-2.5 bg-white/10 text-white border border-white/20 rounded-full font-semibold hover:bg-white/20 transition-colors text-sm cursor-pointer">
               SaaS Coming Soon
             </a>
           </div>
@@ -40,10 +40,10 @@ export default function Home() {
             Intercept, analyze, and block rogue AI tool executions in real-time. Protect your databases, APIs, and infrastructure from hallucinating LLMs.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="https://github.com/lokeshsk/zerotrust-agents" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold text-lg transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)]">
+            <a href="https://github.com/lokeshsk/zerotrust-agents" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold text-lg transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)] cursor-pointer">
               Get Started Open Source
             </a>
-            <a href="#pricing" className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-semibold text-lg transition-all">
+            <a href="#pricing" className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-semibold text-lg transition-all cursor-pointer">
               View Enterprise Edition
             </a>
           </div>
@@ -126,7 +126,7 @@ export default function Home() {
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Basic Telemetry Dashboard</li>
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Prometheus Metrics</li>
               </ul>
-              <a href="https://github.com/lokeshsk/zerotrust-agents" className="block w-full py-3 bg-white/5 hover:bg-white/10 text-center rounded-xl font-semibold transition-colors">Clone Repository</a>
+              <a href="https://github.com/lokeshsk/zerotrust-agents" className="block w-full py-3 bg-white/5 hover:bg-white/10 text-center rounded-xl font-semibold transition-colors cursor-pointer">Clone Repository</a>
             </div>
             
             <div className="bg-gradient-to-b from-indigo-900/40 to-[#111] border border-indigo-500/30 rounded-3xl p-10 relative shadow-[0_0_40px_rgba(79,70,229,0.1)]">
@@ -140,7 +140,7 @@ export default function Home() {
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Active Directory & Auth0 SSO</li>
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Hard Budget & Cost Controls</li>
               </ul>
-              <a href="mailto:hello@zerotrust-agents.com?subject=Enterprise%20Inquiry" className="block w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-center rounded-xl font-semibold transition-colors shadow-lg shadow-indigo-500/25">Contact Sales</a>
+              <a href="mailto:hello@zerotrust-agents.com?subject=Enterprise%20Inquiry" className="block w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-center rounded-xl font-semibold transition-colors shadow-lg shadow-indigo-500/25 cursor-pointer">Contact Sales</a>
             </div>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-10 text-center text-slate-500">
-        <p>© 2026 <a href="https://zerotrust-agents.com" className="hover:text-white transition-colors">ZeroTrust Agents</a>. Open Core under MIT / Enterprise License.</p>
+        <p>© 2026 <a href="https://zerotrust-agents.com" className="hover:text-white transition-colors cursor-pointer">ZeroTrust Agents</a>. Open Core under MIT / Enterprise License.</p>
       </footer>
     </div>
   );
