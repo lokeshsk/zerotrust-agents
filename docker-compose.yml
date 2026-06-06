@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: firewall
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: firewalldb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U firewall -d firewalldb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://firewall:secretpassword@db:5432/firewalldb
+      - SECRET_KEY=super-secret-firewall-key
+    depends_on:
+      db:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ./apps/gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - API_URL=http://api:8001
+      - EE_LICENSE_KEY=${EE_LICENSE_KEY:-}
+    depends_on:
+      - api
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8001
+      - NODE_OPTIONS=--dns-result-order=ipv4first
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

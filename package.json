@@ -1,0 +1,21 @@
+{
+  "name": "agent-firewall",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "ee/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "latest"
+  },
+  "packageManager": "npm@10.8.0",
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.3.0"
+  }
+}
