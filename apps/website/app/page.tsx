@@ -12,15 +12,15 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <span className="font-bold text-xl tracking-tight">ZeroTrust<span className="text-indigo-500">AI</span></span>
+            <span className="font-bold text-xl tracking-tight">ZeroTrust<span className="text-indigo-500">Agents</span></span>
           </div>
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="https://github.com/agent-firewall" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+            <a href="https://github.com/lokeshsk/zerotrust-agents" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
           </div>
           <div>
-            <a href="http://localhost:3000" className="px-5 py-2.5 bg-white text-black rounded-full font-semibold hover:bg-slate-200 transition-colors text-sm">
+            <a href="https://app.zerotrust-agents.com" className="px-5 py-2.5 bg-white text-black rounded-full font-semibold hover:bg-slate-200 transition-colors text-sm">
               Launch Dashboard
             </a>
           </div>
@@ -40,7 +40,7 @@ export default function Home() {
             Intercept, analyze, and block rogue AI tool executions in real-time. Protect your databases, APIs, and infrastructure from hallucinating LLMs.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="https://github.com/agent-firewall" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold text-lg transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)]">
+            <a href="https://github.com/lokeshsk/zerotrust-agents" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold text-lg transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)]">
               Get Started Open Source
             </a>
             <a href="#pricing" className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-semibold text-lg transition-all">
@@ -126,7 +126,7 @@ export default function Home() {
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Basic Telemetry Dashboard</li>
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Prometheus Metrics</li>
               </ul>
-              <a href="https://github.com/agent-firewall" className="block w-full py-3 bg-white/5 hover:bg-white/10 text-center rounded-xl font-semibold transition-colors">Clone Repository</a>
+              <a href="https://github.com/lokeshsk/zerotrust-agents" className="block w-full py-3 bg-white/5 hover:bg-white/10 text-center rounded-xl font-semibold transition-colors">Clone Repository</a>
             </div>
             
             <div className="bg-gradient-to-b from-indigo-900/40 to-[#111] border border-indigo-500/30 rounded-3xl p-10 relative shadow-[0_0_40px_rgba(79,70,229,0.1)]">
@@ -148,7 +148,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-white/5 py-10 text-center text-slate-500">
-        <p>© 2026 Agent Firewall. Open Core under MIT / Enterprise License.</p>
+        <p>© 2026 <a href="https://zerotrust-agents.com" className="hover:text-white transition-colors">ZeroTrust Agents</a>. Open Core under MIT / Enterprise License.</p>
       </footer>
     </div>
   );
