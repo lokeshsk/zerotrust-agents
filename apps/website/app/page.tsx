@@ -20,8 +20,8 @@ export default function Home() {
             <a href="https://github.com/lokeshsk/zerotrust-agents" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
           </div>
           <div>
-            <a href="https://app.zerotrust-agents.com" className="px-5 py-2.5 bg-white text-black rounded-full font-semibold hover:bg-slate-200 transition-colors text-sm">
-              Launch Dashboard
+            <a href="mailto:hello@zerotrust-agents.com?subject=SaaS%20Waitlist" className="px-5 py-2.5 bg-white/10 text-white border border-white/20 rounded-full font-semibold hover:bg-white/20 transition-colors text-sm">
+              SaaS Coming Soon
             </a>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function Home() {
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Active Directory & Auth0 SSO</li>
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Hard Budget & Cost Controls</li>
               </ul>
-              <button className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-center rounded-xl font-semibold transition-colors shadow-lg shadow-indigo-500/25">Contact Sales</button>
+              <a href="mailto:hello@zerotrust-agents.com?subject=Enterprise%20Inquiry" className="block w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-center rounded-xl font-semibold transition-colors shadow-lg shadow-indigo-500/25">Contact Sales</a>
             </div>
           </div>
         </div>
