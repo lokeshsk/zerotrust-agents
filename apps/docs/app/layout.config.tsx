@@ -4,12 +4,16 @@ export const baseOptions = {
   },
   links: [
     {
-      text: 'GitHub',
-      url: 'https://github.com/lokeshsk/zerotrust-agents',
+      text: 'Back to Website',
+      url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     },
     {
       text: 'App Console',
-      url: 'http://localhost:3000',
+      url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/app`,
+    },
+    {
+      text: 'GitHub',
+      url: 'https://github.com/lokeshsk/zerotrust-agents',
     },
   ],
 };

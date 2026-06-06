@@ -15,6 +15,9 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 # Secret key for simple JWT simulation (fallback)
 SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-firewall-key")
 
+# Application URL
+APP_URL = os.getenv("APP_URL", "http://localhost:3000")
+
 # Auth0 Configuration
 AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
 AUTH0_API_AUDIENCE = os.getenv("AUTH0_API_AUDIENCE")
@@ -195,15 +198,15 @@ async def auth_callback(code: str, db: Session = Depends(get_db)):
         # email = decoded_id_token.get("email")
 
         # Redirect back to the frontend with the access_token
-        return RedirectResponse(url=f"http://localhost:3000/?token={access_token}")
+        return RedirectResponse(url=f"{APP_URL}/?token={access_token}")
 
 @router.get("/logout")
 def logout():
     if not AUTH0_DOMAIN:
         # Fallback for basic auth just redirect to home
-        return RedirectResponse(url="http://localhost:3000/")
+        return RedirectResponse(url=f"{APP_URL}/")
         
     client_id = os.getenv("AUTH0_CLIENT_ID")
-    return_to = "http://localhost:3000/"
+    return_to = f"{APP_URL}/"
     url = f"https://{AUTH0_DOMAIN}/v2/logout?client_id={client_id}&returnTo={return_to}"
     return RedirectResponse(url)
