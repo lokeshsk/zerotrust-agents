@@ -8,3 +8,4 @@ dist/
 build/
 .next/
 PRODUCT_ROADMAP.md
+.turbo

@@ -5,6 +5,9 @@ CONTROL_PLANE_URL = os.getenv("API_URL", "http://api:8001")
 GATEWAY_SECRET = os.getenv("SECRET_KEY", "super-secret-firewall-key")
 
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 async def check_policy(tenant_id: str, agent_id: str, tool_name: str, arguments: str) -> str:
     """
@@ -41,12 +44,12 @@ async def check_policy(tenant_id: str, agent_id: str, tool_name: str, arguments:
                             elif operator == "not_equals" and actual_value == expected_value:
                                 return "deny"
                     except Exception as e:
-                        print(f"Failed to evaluate DSL rule: {e}")
+                        logger.error(f"Failed to evaluate DSL rule: {e}")
                         return "deny" # Fail closed
                         
                 return action
     except Exception as e:
-        print(f"Policy Engine Error (failing closed): {e}")
+        logger.error(f"Policy Engine Error (failing closed): {e}")
     return "deny"
 
 async def create_pending_approval(tenant_id: str, agent_id: str, tool_name: str, arguments: str) -> int:
@@ -69,7 +72,7 @@ async def create_pending_approval(tenant_id: str, agent_id: str, tool_name: str,
             if resp.status_code == 200:
                 return resp.json().get("id")
     except Exception as e:
-        print(f"Error creating pending approval: {e}")
+        logger.error(f"Error creating pending approval: {e}")
     return -1
 
 async def wait_for_approval(approval_id: int) -> bool:

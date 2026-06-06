@@ -1,0 +1,17 @@
+---
+title: Model Context Protocol (MCP)
+description: Secure your MCP servers with ZeroTrust Agents
+---
+
+ZeroTrust Agents includes native support for the Model Context Protocol, enabling transparent interception of tool calls between applications and MCP servers.
+
+## Supported Transports
+
+The Gateway supports both standard MCP transport options:
+
+1.  **Stdio Transport**: For local development and command-line tool integrations.
+2.  **SSE (Server-Sent Events) Transport**: For cloud-native microservices and distributed deployments.
+
+## How MCP Security Works
+
+When an agent calls a tool via the MCP client, the Gateway intercepts the `tools/call` JSON request. It evaluates parameters against policy constraints, then either forwards the call to the actual MCP server or returns a mock/blocked error response to the client.

@@ -13,6 +13,8 @@ async def forward_to_upstream(body: dict):
     try:
         # LiteLLM handles the translation automatically.
         response = await litellm.acompletion(**body)
+        if body.get("stream", False):
+            return response
         return response.model_dump()
     except Exception as e:
         if "Missing credentials" in str(e) or "APIKey" in str(e):

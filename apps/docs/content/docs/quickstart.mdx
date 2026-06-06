@@ -1,0 +1,47 @@
+---
+title: Quickstart
+description: Learn how to set up and run the ZeroTrust Agents Gateway
+---
+
+Learn how to set up and run the ZeroTrust Agents Gateway proxy on your local machine or in production.
+
+## 1. Start the Gateway
+
+The easiest way to run the Gateway, Policy Engine, and Redis rate limiter is via Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+This starts the Gateway Proxy on `http://localhost:8000`, the control plane API on `http://localhost:8000/api`, and a local Redis database.
+
+## 2. Configure Your Agent
+
+Redirect your AI agent's SDK client to point to the Gateway instead of the upstream provider directly.
+
+### Python (OpenAI SDK Example)
+
+```python
+import openai
+
+client = openai.OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="your-openai-api-key"
+)
+
+# Gateway will intercept this request and verify policies
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Fetch users from DB"}]
+)
+```
+
+## 3. Create a Security Policy
+
+Define security rules to protect database modifications or system operations. Policies are configured in YAML format via the control plane dashboard.
+
+```yaml
+agent_id: "*"
+tool_name: "execute_sql"
+action: "require_approval"
+```

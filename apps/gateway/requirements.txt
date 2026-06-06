@@ -58,3 +58,6 @@ yarl==1.24.2
 zipp==4.1.0
 litellm
 prometheus_client
+redis
+mcp
+sse-starlette

@@ -16,6 +16,7 @@ export default function Home() {
           </div>
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
             <a href="#features" className="hover:text-white transition-colors cursor-pointer">Features</a>
+            <a href="/docs" className="hover:text-white transition-colors cursor-pointer">Docs</a>
             <a href="#pricing" className="hover:text-white transition-colors cursor-pointer">Pricing</a>
             <a href="https://github.com/lokeshsk/zerotrust-agents" target="_blank" rel="noreferrer" className="hover:text-white transition-colors cursor-pointer">GitHub</a>
           </div>
@@ -40,8 +41,8 @@ export default function Home() {
             Intercept, analyze, and block rogue AI tool executions in real-time. Protect your databases, APIs, and infrastructure from hallucinating LLMs.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="https://github.com/lokeshsk/zerotrust-agents" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold text-lg transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)] cursor-pointer">
-              Get Started Open Source
+            <a href="/docs" className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-semibold text-lg transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)] cursor-pointer">
+              Start Securing Your Agents
             </a>
             <a href="#pricing" className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-full font-semibold text-lg transition-all cursor-pointer">
               View Enterprise Edition

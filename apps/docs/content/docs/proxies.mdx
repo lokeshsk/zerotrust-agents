@@ -1,0 +1,12 @@
+---
+title: Supported Proxies
+description: Overview of LLM APIs supported by ZeroTrust Agents Gateway
+---
+
+ZeroTrust Agents acts as an intelligent router and translator, allowing you to secure different model formats using the same policy DSL.
+
+## Upstream Providers
+
+*   **OpenAI / LiteLLM Proxy**: Interceptors for standard chat completions and assistant tool calls. Zero-latency stream validation.
+*   **Anthropic Messages API**: Intercepts Anthropic-formatted payloads (e.g. Claude 3.5 Sonnet) and translates tool choices into internal policy rules.
+*   **Google Gemini API**: Native support for content generation endpoints and structure-based function call overrides.

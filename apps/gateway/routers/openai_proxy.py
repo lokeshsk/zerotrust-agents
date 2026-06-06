@@ -4,6 +4,9 @@ import json
 import os
 import httpx
 import litellm
+import logging
+
+logger = logging.getLogger(__name__)
 
 from policy_engine import check_policy, log_tool_call
 from proxy import forward_to_upstream
@@ -21,19 +24,42 @@ REQUEST_COUNT = Counter('gateway_requests_total', 'Total requests to the gateway
 TOOL_CALL_COUNT = Counter('gateway_tool_calls_total', 'Total tool calls intercepted', ['agent_id', 'tool_name', 'action'])
 REQUEST_LATENCY = Histogram('gateway_request_latency_seconds', 'Request latency')
 
-# Simple In-Memory Rate Limiter (Anomaly Detection MVP)
-AGENT_CALL_HISTORY = {}
+import redis.asyncio as redis
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+redis_client = None
+
+def get_redis():
+    global redis_client
+    if redis_client is None:
+        redis_client = redis.from_url(REDIS_URL)
+    return redis_client
+
 RATE_LIMIT_WINDOW_SEC = 10
 MAX_CALLS_PER_WINDOW = 3
 
-def is_rate_limited(agent_id: str) -> bool:
-    now = time.time()
-    history = AGENT_CALL_HISTORY.get(agent_id, [])
-    # Filter out old calls
-    history = [t for t in history if now - t < RATE_LIMIT_WINDOW_SEC]
-    if len(history) >= MAX_CALLS_PER_WINDOW:
-        return True
-    history.append(now)
+async def is_rate_limited(agent_id: str) -> bool:
+    try:
+        r = get_redis()
+        now = time.time()
+        key = f"rate_limit:{agent_id}"
+        
+        # Remove old entries
+        await r.zremrangebyscore(key, 0, now - RATE_LIMIT_WINDOW_SEC)
+        
+        # Count requests in window
+        count = await r.zcard(key)
+        if count >= MAX_CALLS_PER_WINDOW:
+            return True
+            
+        # Add this request
+        await r.zadd(key, {str(now): now})
+        # Set TTL to ensure keys don't live forever
+        await r.expire(key, RATE_LIMIT_WINDOW_SEC)
+        return False
+    except Exception as e:
+        print(f"Rate Limiter Error (falling open): {e}")
+        return False
 GATEWAY_SECRET = os.getenv("SECRET_KEY", "super-secret-firewall-key")
 
 async def get_tenant_dlp_config(tenant_id: str):
@@ -47,7 +73,7 @@ async def get_tenant_dlp_config(tenant_id: str):
             if resp.status_code == 200:
                 return resp.json()
     except Exception as e:
-        print(f"Failed to fetch tenant config: {e}")
+        logger.error(f"Failed to fetch tenant config: {e}")
     return None
 
 async def semantic_dlp_check(arguments: str, tenant_id: str) -> str:
@@ -85,7 +111,7 @@ async def semantic_dlp_check(arguments: str, tenant_id: str) -> str:
                 return "Semantic DLP Block: Malicious intent or PII detected by LLM."
             return None
         except Exception as e:
-            print(f"LiteLLM DLP Check Failed, falling back to regex: {e}")
+            logger.error(f"LiteLLM DLP Check Failed, falling back to regex: {e}")
 
         
     # Fallback MVP regex check
@@ -136,11 +162,11 @@ async def chat_completions_proxy(request: Request):
                 return JSONResponse(status_code=401, content={"error": "Invalid API Key"})
             tenant_id = resp.json().get("tenant_id")
     except Exception as e:
-        print(f"Failed to resolve API key: {e}")
+        logger.error(f"Failed to resolve API key: {e}")
         return JSONResponse(status_code=500, content={"error": "Authentication service unavailable"})
 
     # 1. Anomaly Detection / Rate Limiting
-    if is_rate_limited(agent_id):
+    if await is_rate_limited(agent_id):
         REQUEST_COUNT.labels(agent_id=agent_id, status="rate_limited").inc()
         return JSONResponse(status_code=429, content={
             "error": f"Anomaly Detected: Agent '{agent_id}' exceeded rate limit."
@@ -174,11 +200,87 @@ async def chat_completions_proxy(request: Request):
                         timeout=1.0
                     )
         except Exception as e:
-            print(f"Auto-discovery failed: {e}")
+            logger.error(f"Auto-discovery failed: {e}")
 
     # 2. Forward request upstream via LiteLLM
     response_data = await forward_to_upstream(body)
     
+    if body.get("stream", False):
+        from fastapi.responses import StreamingResponse
+        
+        async def stream_generator():
+            tool_call_buffers = {}
+            from main import EE_ACTIVE
+            
+            try:
+                async for chunk in response_data:
+                    chunk_dict = chunk.model_dump()
+                    choices = chunk_dict.get("choices", [])
+                    if not choices:
+                        yield f"data: {json.dumps(chunk_dict)}\n\n"
+                        continue
+                        
+                    delta = choices[0].get("delta", {})
+                    
+                    if "tool_calls" in delta and delta["tool_calls"]:
+                        for tc in delta["tool_calls"]:
+                            idx = tc.get("index", 0)
+                            if idx not in tool_call_buffers:
+                                tool_call_buffers[idx] = {"id": tc.get("id"), "type": "function", "function": {"name": "", "arguments": ""}}
+                            
+                            func = tc.get("function", {})
+                            if func.get("name"):
+                                tool_call_buffers[idx]["function"]["name"] += func["name"]
+                            if func.get("arguments"):
+                                tool_call_buffers[idx]["function"]["arguments"] += func["arguments"]
+                        continue
+                    
+                    # Yield normal text chunks
+                    yield f"data: {json.dumps(chunk_dict)}\n\n"
+                
+                # Evaluate buffered tool calls
+                if tool_call_buffers:
+                    for idx, tc in tool_call_buffers.items():
+                        tool_name = tc["function"]["name"]
+                        arguments = tc["function"]["arguments"]
+                        
+                        dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                        block_reason = dlp_error
+                        is_allowed = not bool(dlp_error)
+                        
+                        if is_allowed:
+                            policy_action = await check_policy(tenant_id, agent_id, tool_name, arguments)
+                            if policy_action == "allow":
+                                is_allowed = True
+                            elif policy_action == "require_approval":
+                                from policy_engine import create_pending_approval, wait_for_approval
+                                approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arguments)
+                                if approval_id > 0:
+                                    logger.info(f"[{agent_id}] Stream suspended for approval ID: {approval_id}")
+                                    is_allowed = await wait_for_approval(approval_id)
+                                else:
+                                    is_allowed = False
+                            else:
+                                is_allowed = False
+                                block_reason = f"SYSTEM FIREWALL BLOCK: You are not authorized to use the tool '{tool_name}'."
+                        
+                        await log_tool_call(tenant_id, agent_id, tool_name, arguments, is_allowed)
+                        TOOL_CALL_COUNT.labels(agent_id=agent_id, tool_name=tool_name, action="allow" if is_allowed else "block").inc()
+                        
+                        if is_allowed:
+                            # Send the whole tool call as one chunk
+                            tc["index"] = idx
+                            yield f"data: {json.dumps({'id': 'chunk', 'choices': [{'delta': {'tool_calls': [tc]}}]})}\n\n"
+                        else:
+                            # Send block message
+                            yield f"data: {json.dumps({'id': 'chunk', 'choices': [{'delta': {'content': f'\\n\\n[{block_reason}]'}, 'finish_reason': 'stop'}]})}\n\n"
+                
+                yield "data: [DONE]\n\n"
+            except Exception as e:
+                logger.error(f"Stream error: {e}")
+                
+        return StreamingResponse(stream_generator(), media_type="text/event-stream")
+
     if EE_ACTIVE:
         track_billing(tenant_id, response_data)
 
@@ -212,9 +314,9 @@ async def chat_completions_proxy(request: Request):
                         approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arguments)
                         if approval_id > 0:
                             # Suspend thread and wait for admin approval
-                            print(f"[{agent_id}] Tool {tool_name} requires approval. Suspending... (ID: {approval_id})")
+                            logger.info(f"[{agent_id}] Tool {tool_name} requires approval. Suspending... (ID: {approval_id})")
                             is_allowed = await wait_for_approval(approval_id)
-                            print(f"[{agent_id}] Approval {approval_id} resolved: {'Allowed' if is_allowed else 'Denied'}")
+                            logger.info(f"[{agent_id}] Approval {approval_id} resolved: {'Allowed' if is_allowed else 'Denied'}")
                         else:
                             is_allowed = False # Fail closed if we couldn't create approval
                 

@@ -39,8 +39,18 @@ services:
     environment:
       - API_URL=http://api:8001
       - EE_LICENSE_KEY=${EE_LICENSE_KEY:-}
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - api
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 
   web:
     build:
@@ -56,3 +66,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
