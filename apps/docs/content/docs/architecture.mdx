@@ -12,6 +12,22 @@ ZeroTrust Agents acts as a secure, transparent reverse proxy sitting between you
 3.  **Semantic DLP Inspection**: For sensitive operations, a DLP engine inspects parameters for credential leaks, toxic prompts, or SQL injections using local embeddings or models.
 4.  **Upstream Routing & Streaming**: If policies approve, the Gateway forwards the request to the upstream API and streams back the completions transparently to your agent.
 
+```mermaid
+graph TD
+    A[Autonomous AI Agent] -->|Tool Call Request| G[Gateway Proxy]
+    
+    subgraph Control Plane
+    G <-->|Policy Check| API[FastAPI Server]
+    API <--> DB[(PostgreSQL)]
+    end
+
+    subgraph External
+    G -->|If Allowed| LLM[OpenAI / Anthropic]
+    end
+    
+    D[Admin Dashboard] --> API
+```
+
 ## Storage & Caching
 
 The control plane utilizes Redis for cluster-wide distributed rate limiting and policy configurations, ensuring rapid authorization checks under high load.

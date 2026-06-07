@@ -6,6 +6,8 @@
     "architecture",
     "proxies",
     "mcp",
+    "policy",
+    "api",
     "enterprise"
   ]
 }

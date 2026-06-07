@@ -7,6 +7,6 @@ const create = browser<typeof Config, import("fumadocs-mdx/runtime/types").Inter
   }
 }>();
 const browserCollections = {
-  docs: create.doc("docs", {"architecture.mdx": () => import("../content/docs/architecture.mdx?collection=docs"), "enterprise.mdx": () => import("../content/docs/enterprise.mdx?collection=docs"), "index.mdx": () => import("../content/docs/index.mdx?collection=docs"), "mcp.mdx": () => import("../content/docs/mcp.mdx?collection=docs"), "proxies.mdx": () => import("../content/docs/proxies.mdx?collection=docs"), "quickstart.mdx": () => import("../content/docs/quickstart.mdx?collection=docs"), }),
+  docs: create.doc("docs", {"api.mdx": () => import("../content/docs/api.mdx?collection=docs"), "architecture.mdx": () => import("../content/docs/architecture.mdx?collection=docs"), "enterprise.mdx": () => import("../content/docs/enterprise.mdx?collection=docs"), "index.mdx": () => import("../content/docs/index.mdx?collection=docs"), "mcp.mdx": () => import("../content/docs/mcp.mdx?collection=docs"), "policy.mdx": () => import("../content/docs/policy.mdx?collection=docs"), "proxies.mdx": () => import("../content/docs/proxies.mdx?collection=docs"), "quickstart.mdx": () => import("../content/docs/quickstart.mdx?collection=docs"), }),
 };
 export default browserCollections;

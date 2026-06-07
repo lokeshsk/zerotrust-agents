@@ -122,8 +122,111 @@ async def generate_content_proxy(model: str, request: Request):
     if openai_tools:
         litellm_kwargs["tools"] = openai_tools
 
+    if body.get("stream", False):
+        litellm_kwargs["stream"] = True
+
     try:
         response = await litellm.acompletion(**litellm_kwargs)
+        if body.get("stream", False):
+            from fastapi.responses import StreamingResponse
+            
+            async def stream_generator():
+                tool_call_buffers = {}
+                from main import EE_ACTIVE
+                
+                try:
+                    async for chunk in response:
+                        chunk_dict = chunk.model_dump()
+                        choices = chunk_dict.get("choices", [])
+                        if not choices:
+                            continue
+                        
+                        delta = choices[0].get("delta", {})
+                        
+                        if "tool_calls" in delta and delta["tool_calls"]:
+                            for tc in delta["tool_calls"]:
+                                idx = tc.get("index", 0)
+                                if idx not in tool_call_buffers:
+                                    tool_call_buffers[idx] = {"id": tc.get("id"), "type": "tool_use", "name": "", "input_str": ""}
+                                
+                                func = tc.get("function", {})
+                                if func.get("name"):
+                                    tool_call_buffers[idx]["name"] += func["name"]
+                                if func.get("arguments"):
+                                    tool_call_buffers[idx]["input_str"] += func["arguments"]
+                            continue
+                        
+                        if "content" in delta and delta["content"]:
+                            gemini_chunk = {
+                                "candidates": [
+                                    {
+                                        "content": {
+                                            "parts": [{"text": delta["content"]}],
+                                            "role": "model"
+                                        }
+                                    }
+                                ]
+                            }
+                            yield f'data: {json.dumps(gemini_chunk)}\n\n'
+
+                    if tool_call_buffers:
+                        for idx, tc in tool_call_buffers.items():
+                            tool_name = tc["name"]
+                            arguments = tc["input_str"]
+                            
+                            dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                            is_allowed = not bool(dlp_error)
+                            block_reason = dlp_error
+                            
+                            if is_allowed:
+                                policy_action = await check_policy(tenant_id, agent_id, tool_name, arguments)
+                                if policy_action == "allow":
+                                    is_allowed = True
+                                elif policy_action == "require_approval":
+                                    from policy_engine import create_pending_approval, wait_for_approval
+                                    approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arguments)
+                                    if approval_id > 0:
+                                        is_allowed = await wait_for_approval(approval_id)
+                                    else:
+                                        is_allowed = False
+                                else:
+                                    is_allowed = False
+                                    block_reason = f"SYSTEM FIREWALL BLOCK: Not authorized for '{tool_name}'."
+                            
+                            await log_tool_call(tenant_id, agent_id, tool_name, arguments, is_allowed)
+                            TOOL_CALL_COUNT.labels(agent_id=agent_id, tool_name=tool_name, action="allow" if is_allowed else "block").inc()
+                            
+                            if is_allowed:
+                                args_dict = json.loads(arguments) if isinstance(arguments, str) else arguments
+                                gemini_chunk = {
+                                    "candidates": [
+                                        {
+                                            "content": {
+                                                "parts": [{"functionCall": {"name": tool_name, "args": args_dict}}],
+                                                "role": "model"
+                                            }
+                                        }
+                                    ]
+                                }
+                                yield f'data: {json.dumps(gemini_chunk)}\n\n'
+                            else:
+                                gemini_chunk = {
+                                    "candidates": [
+                                        {
+                                            "content": {
+                                                "parts": [{"text": f"\n\n[{block_reason}]"}],
+                                                "role": "model"
+                                            }
+                                        }
+                                    ]
+                                }
+                                yield f'data: {json.dumps(gemini_chunk)}\n\n'
+
+                except Exception as e:
+                    logger.error(f"Gemini stream error: {e}")
+                    
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+
         response_data = response.model_dump()
     except Exception as e:
         logger.error(f"Gemini upstream error: {e}")
@@ -166,6 +269,14 @@ async def generate_content_proxy(model: str, request: Request):
                     policy_action = await check_policy(tenant_id, agent_id, tool_name, arguments)
                     if policy_action == "allow":
                         is_allowed = True
+                    elif policy_action == "require_approval":
+                        from policy_engine import create_pending_approval, wait_for_approval
+                        approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arguments)
+                        if approval_id > 0:
+                            logger.info(f"[{agent_id}] Gemini tool {tool_name} requires approval. Suspending... (ID: {approval_id})")
+                            is_allowed = await wait_for_approval(approval_id)
+                        else:
+                            is_allowed = False
                     else:
                         is_allowed = False
                         block_reason = f"SYSTEM FIREWALL BLOCK: Not authorized for '{tool_name}'."

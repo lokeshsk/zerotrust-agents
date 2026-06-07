@@ -37,6 +37,14 @@ async def process_mcp_message(message: dict, tenant_id: str, agent_id: str) -> d
             policy_action = await check_policy(tenant_id, agent_id, tool_name, arg_str)
             if policy_action == "allow":
                 is_allowed = True
+            elif policy_action == "require_approval":
+                from policy_engine import create_pending_approval, wait_for_approval
+                approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arg_str)
+                if approval_id > 0:
+                    logger.info(f"[{agent_id}] MCP tool {tool_name} requires approval. Suspending... (ID: {approval_id})")
+                    is_allowed = await wait_for_approval(approval_id)
+                else:
+                    is_allowed = False
             else:
                 is_allowed = False
                 block_reason = f"SYSTEM FIREWALL BLOCK: Not authorized for '{tool_name}'."
@@ -74,9 +82,22 @@ async def mcp_message(request: Request):
         # Blocked
         return processed
         
-    # Forward to upstream (MVP: mocked forwarding)
-    # In a full implementation, we'd use httpx to send to UPSTREAM_MCP_URL
-    return {"jsonrpc": "2.0", "id": body.get("id"), "result": {"content": [{"type": "text", "text": "Upstream mocked"}]}}
+    # Forward to upstream
+    from routers.openai_proxy import get_tenant_dlp_config
+    config = await get_tenant_dlp_config(tenant_id)
+    upstream_url = config.get("mcp_upstream_url", "http://localhost:8080") if config else "http://localhost:8080"
+    
+    import httpx
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(f"{upstream_url}/message", json=processed, timeout=30.0)
+            if resp.status_code == 200:
+                return resp.json()
+            else:
+                return {"jsonrpc": "2.0", "id": body.get("id"), "error": {"code": -32000, "message": f"Upstream MCP returned status {resp.status_code}"}}
+    except Exception as e:
+        logger.error(f"Failed to forward to MCP upstream: {e}")
+        return {"jsonrpc": "2.0", "id": body.get("id"), "error": {"code": -32000, "message": "Upstream MCP Unreachable"}}
 
 @router.get("/sse")
 async def mcp_sse(request: Request):

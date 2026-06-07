@@ -11,6 +11,10 @@ router = APIRouter(prefix="/logs", tags=["Audit Logs"])
 
 import requests
 from fastapi import BackgroundTasks
+from routers.ws import manager
+
+async def broadcast_log(log_data: dict):
+    await manager.broadcast({"type": "NEW_LOG", "data": log_data})
 
 def send_siem_webhook(url: str, payload: dict):
     try:
@@ -34,6 +38,10 @@ def create_log(log: schemas.LogCreate, background_tasks: BackgroundTasks, db: Se
         
     db.commit()
     db.refresh(db_log)
+    
+    # Broadcast to dashboard
+    background_tasks.add_task(broadcast_log, schemas.LogResponse.model_validate(db_log).model_dump(mode="json"))
+    
     return db_log
 
 @router.get("/", response_model=List[schemas.LogResponse])

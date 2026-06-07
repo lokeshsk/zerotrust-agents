@@ -37,10 +37,12 @@ def get_tenant_config(tenant_id: str, db: Session = Depends(get_db), gateway: bo
         "dlp_model": tenant.dlp_model,
         "dlp_api_base": tenant.dlp_api_base,
         "dlp_api_key": tenant.dlp_api_key,
+        "dlp_sensitivity": tenant.dlp_sensitivity,
         "monthly_budget": tenant.monthly_budget,
         "current_spend": tenant.current_spend,
         "siem_webhook_url": tenant.siem_webhook_url,
-        "hitl_webhook_url": tenant.hitl_webhook_url
+        "hitl_webhook_url": tenant.hitl_webhook_url,
+        "mcp_upstream_url": tenant.mcp_upstream_url
     }
 
 @router.post("/{tenant_id}/config")
@@ -52,9 +54,11 @@ def update_tenant_config(tenant_id: str, config: schemas.TenantConfigUpdate, db:
     if config.dlp_model is not None: tenant.dlp_model = config.dlp_model
     if config.dlp_api_base is not None: tenant.dlp_api_base = config.dlp_api_base
     if config.dlp_api_key is not None: tenant.dlp_api_key = config.dlp_api_key
+    if config.dlp_sensitivity is not None: tenant.dlp_sensitivity = config.dlp_sensitivity
     if config.monthly_budget is not None: tenant.monthly_budget = config.monthly_budget
     if config.siem_webhook_url is not None: tenant.siem_webhook_url = config.siem_webhook_url
     if config.hitl_webhook_url is not None: tenant.hitl_webhook_url = config.hitl_webhook_url
+    if config.mcp_upstream_url is not None: tenant.mcp_upstream_url = config.mcp_upstream_url
     
     db.commit()
     return {"status": "ok"}
@@ -177,6 +181,10 @@ def list_approvals(x_tenant_id: str = Header(default="default", alias="x-tenant-
 
 import requests
 from fastapi import BackgroundTasks
+from routers.ws import manager
+
+async def broadcast_approval(approval_data: dict):
+    await manager.broadcast({"type": "NEW_APPROVAL", "data": approval_data})
 
 def send_hitl_webhook(url: str, payload: dict):
     try:
@@ -198,6 +206,8 @@ def create_approval(approval: schemas.PendingApprovalBase, background_tasks: Bac
     tenant = db.query(models.TenantDB).filter(models.TenantDB.id == approval.tenant_id).first()
     if tenant and tenant.hitl_webhook_url:
         background_tasks.add_task(send_hitl_webhook, tenant.hitl_webhook_url, db_approval.__dict__)
+        
+    background_tasks.add_task(broadcast_approval, schemas.PendingApproval.model_validate(db_approval).model_dump(mode="json"))
         
     return db_approval
 

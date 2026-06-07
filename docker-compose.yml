@@ -40,6 +40,7 @@ services:
       - API_URL=http://api:8001
       - EE_LICENSE_KEY=${EE_LICENSE_KEY:-}
       - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-super-secret-firewall-key}
     depends_on:
       - api
       - redis

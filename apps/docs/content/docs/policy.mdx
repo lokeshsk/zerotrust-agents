@@ -1,0 +1,50 @@
+---
+title: Policy Language Reference
+description: Writing YAML policies for ZeroTrust Agents
+---
+
+ZeroTrust Agents uses a declarative YAML-based Policy-as-Code engine to define security boundaries for your autonomous AI agents.
+
+## Basic Structure
+
+Policies define exactly which tools an agent is allowed to use, and under what conditions.
+
+```yaml
+policies:
+  - agent_id: "Agent-Alpha"
+    tool_name: "execute_sql"
+    action: "deny"
+    
+  - agent_id: "Agent-Beta"
+    tool_name: "fetch_customer_data"
+    action: "require_approval"
+    
+  - agent_id: "Agent-Gamma"
+    tool_name: "read_public_website"
+    action: "allow"
+```
+
+## Available Actions
+
+There are three primary actions supported by the Policy Engine:
+
+- **`allow`**: The agent can execute this tool freely without interruption. The payload is still scanned by the Semantic DLP engine before execution.
+- **`deny`**: The agent is explicitly forbidden from executing this tool. The LLM will receive a system message indicating the action was blocked.
+- **`require_approval`**: The agent's stream is suspended. An alert is sent to an administrator (e.g., via Slack or Dashboard). The agent will hang waiting for the administrator to approve or reject the request.
+
+## Advanced DSL (Coming Soon)
+
+In Phase 2, the Policy Engine will support complex boolean logic and argument validation directly within the YAML specification:
+
+```yaml
+policies:
+  - agent_id: "Agent-Alpha"
+    tool_name: "execute_payment"
+    action: "allow"
+    dsl_rules:
+      logic: "AND"
+      rules:
+        - field: "arguments.amount"
+          operator: "less_than"
+          value: 1000
+```

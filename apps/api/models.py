@@ -16,14 +16,15 @@ class TenantDB(Base):
     dlp_model = Column(String, nullable=True) # e.g., 'ollama/llama3'
     dlp_api_base = Column(String, nullable=True) # e.g., 'http://localhost:11434'
     dlp_api_key = Column(String, nullable=True)
-    
-    # SIEM / Logging
+    dlp_sensitivity = Column(String, default="high") # low, medium, high
     siem_webhook_url = Column(String, nullable=True)
     
     # EE Features (Slack & Budget)
     hitl_webhook_url = Column(String, nullable=True)
     monthly_budget = Column(Integer, default=0) # e.g., budget in cents
     current_spend = Column(Integer, default=0)
+    
+    mcp_upstream_url = Column(String, default="http://localhost:8080")
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

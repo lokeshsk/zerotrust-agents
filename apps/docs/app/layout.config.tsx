@@ -7,7 +7,7 @@ export const baseOptions = {
     {
       text: 'Back to Website',
       url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-      external: false,
+      active: 'nested-url',
     },
     // {
     //   text: 'App Console',

@@ -122,8 +122,25 @@ export default function Home() {
   useEffect(() => {
     if (authStatus === "authenticated") {
       fetchData();
-      const interval = setInterval(fetchData, 2000);
-      return () => clearInterval(interval);
+      
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/api/ws/events`;
+      const ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === "NEW_LOG" || message.type === "NEW_APPROVAL") {
+            fetchData();
+          }
+        } catch (e) {
+          console.error("WS Parse error", e);
+        }
+      };
+
+      return () => {
+        ws.close();
+      };
     }
   }, [authStatus, selectedTenant, jwtToken]);
 

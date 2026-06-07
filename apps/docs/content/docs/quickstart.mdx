@@ -5,43 +5,74 @@ description: Learn how to set up and run the ZeroTrust Agents Gateway
 
 Learn how to set up and run the ZeroTrust Agents Gateway proxy on your local machine or in production.
 
-## 1. Start the Gateway
+## 1. Installation
 
-The easiest way to run the Gateway, Policy Engine, and Redis rate limiter is via Docker Compose:
+The easiest way to get started is by using the interactive `start.sh` setup script. It automatically copies environment files and sets up your Docker containers.
 
 ```bash
-docker compose up --build
+git clone https://github.com/lokeshsk/zerotrust-agents.git
+cd zerotrust-agents
+chmod +x start.sh
+./start.sh
 ```
 
-This starts the Gateway Proxy on `http://localhost:8000`, the control plane API on `http://localhost:8000/api`, and a local Redis database.
+When prompted, select **[1] Docker Compose (Recommended)**.
+
+The script will launch:
+- **Gateway Proxy**: `http://localhost:8000`
+- **Control Plane API**: `http://localhost:8000/api`
+- **Dashboard UI**: `http://localhost:3000`
+- **PostgreSQL Database** & **Redis**
 
 ## 2. Configure Your Agent
 
-Redirect your AI agent's SDK client to point to the Gateway instead of the upstream provider directly.
+To route your agent's traffic through the firewall, simply change its `base_url`.
 
-### Python (OpenAI SDK Example)
+### Python (OpenAI Example)
 
 ```python
 import openai
 
 client = openai.OpenAI(
     base_url="http://localhost:8000/v1",
-    api_key="your-openai-api-key"
+    api_key="your-openai-api-key",
+    default_headers={"x-agent-id": "Agent-Alpha"}
 )
 
-# Gateway will intercept this request and verify policies
+# The gateway will intercept this request, apply DLP scanning, 
+# and verify any tool calls against your security policies.
 response = client.chat.completions.create(
     model="gpt-4o",
     messages=[{"role": "user", "content": "Fetch users from DB"}]
 )
 ```
 
+### Python (Anthropic Example)
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    base_url="http://localhost:8000/v1",
+    api_key="your-anthropic-api-key",
+    default_headers={"x-agent-id": "Agent-Beta"}
+)
+```
+
 ## 3. Create a Security Policy
 
-Define security rules to protect database modifications or system operations. Policies are configured in YAML format via the control plane dashboard.
+By default, the gateway operates on a default-deny principle for all discovered tools. To allow a tool or require human approval, define a security rule in the Dashboard (`http://localhost:3000`).
 
-```yaml
-agent_id: "*"
-tool_name: "execute_sql"
-action: "require_approval"
+Alternatively, use the API:
+
+```bash
+curl -X POST http://localhost:8000/api/policies/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "agent_id": "Agent-Alpha",
+    "tool_name": "execute_sql",
+    "action": "require_approval"
+  }'
 ```
+
+Now, any time `Agent-Alpha` attempts to execute SQL, the request will be suspended until an administrator clicks **Approve** in the dashboard.

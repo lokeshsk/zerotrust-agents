@@ -2,18 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import hashlib
 import os
 import jwt
 from jwt import PyJWKClient
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 import models
 from database import get_db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-# Secret key for simple JWT simulation (fallback)
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-firewall-key")
+# Secret key for simple JWT simulation
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is missing. It is required for security.")
 
 # Application URL
 APP_URL = os.getenv("APP_URL", "http://localhost:3000")
@@ -33,7 +37,10 @@ class LoginRequest(BaseModel):
     password: str
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 def verify_jwt(credentials: HTTPAuthorizationCredentials = Security(security)):
     if not credentials:
@@ -135,11 +142,14 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not admin:
         raise HTTPException(status_code=400, detail="Admin not setup")
         
-    if admin.password_hash != hash_password(request.password):
+    if not verify_password(request.password, admin.password_hash):
         raise HTTPException(status_code=401, detail="Invalid password")
         
     # Return a basic token for demonstration
     # In production, use standard JWT with expiration
+    # We use a hash here to simulate a token for the existing MVP, 
+    # but normally this should be a properly signed JWT.
+    import hashlib
     token = hashlib.sha256(f"{admin.username}:{SECRET_KEY}".encode()).hexdigest()
     return {"token": token}
 @router.get("/login/sso")

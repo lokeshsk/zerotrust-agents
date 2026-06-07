@@ -6,9 +6,11 @@ class TenantConfigUpdate(BaseModel):
     dlp_model: Optional[str] = None
     dlp_api_base: Optional[str] = None
     dlp_api_key: Optional[str] = None
+    dlp_sensitivity: Optional[str] = None
     monthly_budget: Optional[int] = None
     siem_webhook_url: Optional[str] = None
     hitl_webhook_url: Optional[str] = None
+    mcp_upstream_url: Optional[str] = None
 
 # Policy Schemas
 class PolicyBase(BaseModel):

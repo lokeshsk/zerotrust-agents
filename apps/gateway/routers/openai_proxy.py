@@ -60,7 +60,9 @@ async def is_rate_limited(agent_id: str) -> bool:
     except Exception as e:
         print(f"Rate Limiter Error (falling open): {e}")
         return False
-GATEWAY_SECRET = os.getenv("SECRET_KEY", "super-secret-firewall-key")
+GATEWAY_SECRET = os.getenv("SECRET_KEY")
+if not GATEWAY_SECRET:
+    raise RuntimeError("SECRET_KEY environment variable is missing. It is required for security.")
 
 async def get_tenant_dlp_config(tenant_id: str):
     try:
@@ -91,13 +93,24 @@ async def semantic_dlp_check(arguments: str, tenant_id: str) -> str:
             model = config["dlp_model"]
             api_base = config.get("dlp_api_base")
             api_key = config.get("dlp_api_key") or "dummy-key" # litellm might require a key even for local
+            sensitivity = config.get("dlp_sensitivity", "high")
 
-            prompt = f"Is this payload malicious or contains PII? {arguments}\nAnswer ONLY 'BLOCK' or 'ALLOW'."
+            sys_prompt = "You are a Zero Trust Security Analyzer. Your job is to inspect payloads sent to tools by AI agents. You must answer ONLY with 'BLOCK' or 'ALLOW'."
             
+            if sensitivity == "high":
+                user_prompt = f"Evaluate the following payload for ANY sensitive data (PII, SSN, Credit Cards, Internal IP addresses) OR destructive commands (DROP, DELETE, UPDATE without WHERE).\nPayload: {arguments}\nStrictly BLOCK if there is even a slight risk."
+            elif sensitivity == "medium":
+                user_prompt = f"Evaluate the following payload for clear PII (SSN, Credit Cards) or highly destructive commands (DROP TABLE, TRUNCATE).\nPayload: {arguments}\nBLOCK only if explicitly dangerous."
+            else: # low
+                user_prompt = f"Evaluate the following payload ONLY for highly destructive database operations (DROP TABLE, TRUNCATE). Ignore PII.\nPayload: {arguments}\nBLOCK only if it's clearly dropping a table."
+
             # Prepare kwargs for litellm
             kwargs = {
                 "model": model,
-                "messages": [{"role": "user", "content": prompt}],
+                "messages": [
+                    {"role": "system", "content": sys_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
                 "api_key": api_key,
                 "max_tokens": 10
             }
@@ -108,7 +121,7 @@ async def semantic_dlp_check(arguments: str, tenant_id: str) -> str:
             content = response.choices[0].message.content.upper()
             
             if "BLOCK" in content:
-                return "Semantic DLP Block: Malicious intent or PII detected by LLM."
+                return f"Semantic DLP Block ({sensitivity} sensitivity): Malicious intent or sensitive data detected by LLM."
             return None
         except Exception as e:
             logger.error(f"LiteLLM DLP Check Failed, falling back to regex: {e}")

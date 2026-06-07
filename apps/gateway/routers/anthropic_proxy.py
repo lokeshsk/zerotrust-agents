@@ -114,9 +114,95 @@ async def messages_proxy(request: Request):
         litellm_kwargs["tools"] = openai_tools
     if "max_tokens" in body:
         litellm_kwargs["max_tokens"] = body["max_tokens"]
+    if body.get("stream", False):
+        litellm_kwargs["stream"] = True
 
     try:
         response = await litellm.acompletion(**litellm_kwargs)
+        if body.get("stream", False):
+            from fastapi.responses import StreamingResponse
+            
+            async def stream_generator():
+                yield f'event: message_start\ndata: {json.dumps({"type": "message_start", "message": {"id": "msg_1", "role": "assistant", "model": body.get("model"), "content": []}})}\n\n'
+                
+                tool_call_buffers = {}
+                from main import EE_ACTIVE
+                
+                try:
+                    content_index = 0
+                    has_started_text = False
+                    
+                    async for chunk in response:
+                        chunk_dict = chunk.model_dump()
+                        choices = chunk_dict.get("choices", [])
+                        if not choices:
+                            continue
+                        
+                        delta = choices[0].get("delta", {})
+                        
+                        if "tool_calls" in delta and delta["tool_calls"]:
+                            for tc in delta["tool_calls"]:
+                                idx = tc.get("index", 0)
+                                if idx not in tool_call_buffers:
+                                    tool_call_buffers[idx] = {"id": tc.get("id"), "type": "tool_use", "name": "", "input_str": ""}
+                                
+                                func = tc.get("function", {})
+                                if func.get("name"):
+                                    tool_call_buffers[idx]["name"] += func["name"]
+                                if func.get("arguments"):
+                                    tool_call_buffers[idx]["input_str"] += func["arguments"]
+                            continue
+                        
+                        if "content" in delta and delta["content"]:
+                            if not has_started_text:
+                                yield f'event: content_block_start\ndata: {json.dumps({"type": "content_block_start", "index": content_index, "content_block": {"type": "text", "text": ""}})}\n\n'
+                                has_started_text = True
+                                
+                            yield f'event: content_block_delta\ndata: {json.dumps({"type": "content_block_delta", "index": content_index, "delta": {"type": "text_delta", "text": delta["content"]}})}\n\n'
+
+                    if tool_call_buffers:
+                        for idx, tc in tool_call_buffers.items():
+                            tool_name = tc["name"]
+                            arguments = tc["input_str"]
+                            
+                            dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                            is_allowed = not bool(dlp_error)
+                            block_reason = dlp_error
+                            
+                            if is_allowed:
+                                policy_action = await check_policy(tenant_id, agent_id, tool_name, arguments)
+                                if policy_action == "allow":
+                                    is_allowed = True
+                                elif policy_action == "require_approval":
+                                    from policy_engine import create_pending_approval, wait_for_approval
+                                    approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arguments)
+                                    if approval_id > 0:
+                                        is_allowed = await wait_for_approval(approval_id)
+                                    else:
+                                        is_allowed = False
+                                else:
+                                    is_allowed = False
+                                    block_reason = f"SYSTEM FIREWALL BLOCK: Not authorized for '{tool_name}'."
+                            
+                            await log_tool_call(tenant_id, agent_id, tool_name, arguments, is_allowed)
+                            TOOL_CALL_COUNT.labels(agent_id=agent_id, tool_name=tool_name, action="allow" if is_allowed else "block").inc()
+                            
+                            if is_allowed:
+                                yield f'event: content_block_start\ndata: {json.dumps({"type": "content_block_start", "index": content_index + 1 + idx, "content_block": {"type": "tool_use", "id": tc["id"], "name": tool_name, "input": {}}})}\n\n'
+                                yield f'event: content_block_delta\ndata: {json.dumps({"type": "content_block_delta", "index": content_index + 1 + idx, "delta": {"type": "input_json_delta", "partial_json": arguments}})}\n\n'
+                                yield f'event: content_block_stop\ndata: {json.dumps({"type": "content_block_stop", "index": content_index + 1 + idx})}\n\n'
+                            else:
+                                yield f'event: content_block_start\ndata: {json.dumps({"type": "content_block_start", "index": content_index + 1 + idx, "content_block": {"type": "text", "text": ""}})}\n\n'
+                                yield f'event: content_block_delta\ndata: {json.dumps({"type": "content_block_delta", "index": content_index + 1 + idx, "delta": {"type": "text_delta", "text": f"\\n\\n[{block_reason}]"}})}\n\n'
+                                yield f'event: content_block_stop\ndata: {json.dumps({"type": "content_block_stop", "index": content_index + 1 + idx})}\n\n'
+
+                    yield f'event: message_delta\ndata: {json.dumps({"type": "message_delta", "delta": {"stop_reason": "end_turn"}})}\n\n'
+                    yield f'event: message_stop\ndata: {json.dumps({"type": "message_stop"})}\n\n'
+                except Exception as e:
+                    logger.error(f"Anthropic stream error: {e}")
+                    
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+
         response_data = response.model_dump()
     except Exception as e:
         logger.error(f"Anthropic upstream error: {e}")
@@ -165,6 +251,14 @@ async def messages_proxy(request: Request):
                     policy_action = await check_policy(tenant_id, agent_id, tool_name, arguments)
                     if policy_action == "allow":
                         is_allowed = True
+                    elif policy_action == "require_approval":
+                        from policy_engine import create_pending_approval, wait_for_approval
+                        approval_id = await create_pending_approval(tenant_id, agent_id, tool_name, arguments)
+                        if approval_id > 0:
+                            logger.info(f"[{agent_id}] Anthropic tool {tool_name} requires approval. Suspending... (ID: {approval_id})")
+                            is_allowed = await wait_for_approval(approval_id)
+                        else:
+                            is_allowed = False
                     else:
                         is_allowed = False
                         block_reason = f"SYSTEM FIREWALL BLOCK: Not authorized for '{tool_name}'."

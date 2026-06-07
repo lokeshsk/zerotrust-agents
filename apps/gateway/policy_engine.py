@@ -9,6 +9,52 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def evaluate_dsl(rule: dict, args_dict: dict) -> bool:
+    if "condition" in rule and "rules" in rule:
+        condition = str(rule["condition"]).upper()
+        rules = rule["rules"]
+        if condition == "AND":
+            return all(evaluate_dsl(r, args_dict) for r in rules)
+        elif condition == "OR":
+            return any(evaluate_dsl(r, args_dict) for r in rules)
+        return False
+
+    field = rule.get("field")
+    operator = rule.get("operator")
+    expected_value = rule.get("value")
+
+    if not field:
+        return True # Empty rule evaluates to true
+
+    # Handle nested field access (e.g. "user.id")
+    actual_value = args_dict
+    for key in str(field).split('.'):
+        if isinstance(actual_value, dict) and key in actual_value:
+            actual_value = actual_value[key]
+        else:
+            return False # Field not found
+
+    if operator == "equals":
+        return actual_value == expected_value
+    elif operator == "not_equals":
+        return actual_value != expected_value
+    elif operator == "contains":
+        return str(expected_value).lower() in str(actual_value).lower()
+    elif operator == "not_contains":
+        return str(expected_value).lower() not in str(actual_value).lower()
+    elif operator == "greater_than":
+        try: return float(actual_value) > float(expected_value)
+        except: return False
+    elif operator == "less_than":
+        try: return float(actual_value) < float(expected_value)
+        except: return False
+    elif operator == "regex":
+        import re
+        try: return bool(re.search(str(expected_value), str(actual_value)))
+        except: return False
+        
+    return False
+
 async def check_policy(tenant_id: str, agent_id: str, tool_name: str, arguments: str) -> str:
     """
     Check with the control plane if the agent is allowed to call this tool.
@@ -32,17 +78,8 @@ async def check_policy(tenant_id: str, agent_id: str, tool_name: str, arguments:
                     try:
                         rule = json.loads(dsl_rules_str)
                         args_dict = json.loads(arguments)
-                        
-                        field = rule.get("field")
-                        operator = rule.get("operator")
-                        expected_value = rule.get("value")
-                        
-                        if field in args_dict:
-                            actual_value = args_dict[field]
-                            if operator == "equals" and actual_value != expected_value:
-                                return "deny"
-                            elif operator == "not_equals" and actual_value == expected_value:
-                                return "deny"
+                        if not evaluate_dsl(rule, args_dict):
+                            return "deny"
                     except Exception as e:
                         logger.error(f"Failed to evaluate DSL rule: {e}")
                         return "deny" # Fail closed

@@ -9,6 +9,21 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/lokeshsk/zerotrust-agents/stargazers"><img src="https://img.shields.io/github/stars/lokeshsk/zerotrust-agents?style=for-the-badge&color=yellow" alt="Stars" /></a>
+  <a href="https://github.com/lokeshsk/zerotrust-agents/blob/main/LICENSE"><img src="https://img.shields.io/github/license/lokeshsk/zerotrust-agents?style=for-the-badge&color=blue" alt="License" /></a>
+  <a href="https://zerotrust-agents.com"><img src="https://img.shields.io/website?url=https%3A%2F%2Fzerotrust-agents.com&style=for-the-badge&label=Website" alt="Website" /></a>
+  <a href="https://docs.zerotrust-agents.com"><img src="https://img.shields.io/badge/Docs-Live-green?style=for-the-badge" alt="Docs" /></a>
+</p>
+
+<!-- 
+TODO: Add Demo GIF or YouTube Video embed here
+Example: 
+<p align="center">
+  <a href="https://youtu.be/YOUR_VIDEO_ID"><img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg" alt="Agent Firewall Demo" width="800"></a>
+</p>
+-->
+
+<p align="center">
   <a href="#quickstart">Quickstart</a> •
   <a href="#features">Features</a> •
   <a href="#architecture">Architecture</a> •
@@ -19,10 +34,10 @@
 
 ---
 
-## What We Are Building
+## Why ZeroTrust Agents?
 As AI Agents become increasingly autonomous (executing SQL, calling external APIs, writing to databases), organizations need a centralized security layer to prevent rogue actions, ensure compliance, and monitor AI behavior in real time.
 
-**Agent Firewall** is an enterprise-grade API Gateway that sits securely between your AI Agent and its LLM provider (OpenAI, Anthropic, Gemini, etc.). It intercepts the agent's attempts to use tools and evaluates those actions against a strict, zero-trust security policy engine before allowing them to execute.
+**ZeroTrust Agents** acts as an enterprise-grade API Gateway that sits securely between your AI Agent and its LLM provider (OpenAI, Anthropic, Gemini, etc.). It intercepts the agent's attempts to use tools and evaluates those actions against a strict, zero-trust security policy engine before allowing them to execute.
 
 ## Features
 - **🔥 LiteLLM Proxy Engine**: Agnostic proxy that intercepts traffic and forces LLMs to adhere to predefined tool-use policies. We support the `OpenAI`, `Anthropic`, and `Gemini` tool-use specification formats natively.

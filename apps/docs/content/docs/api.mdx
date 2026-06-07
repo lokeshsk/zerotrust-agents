@@ -1,0 +1,37 @@
+---
+title: API Reference
+description: Control Plane API documentation
+---
+
+The ZeroTrust Agents Control Plane provides a RESTful API for managing policies, reviewing logs, and resolving pending HITL approvals.
+
+## Authentication
+
+All API requests to the Control Plane must include the `x-tenant-id` header (for multi-tenant deployments) and an `Authorization: Bearer <JWT_TOKEN>` header for user authentication.
+
+## Policies API
+
+### List Policies
+`GET /api/policies`
+
+Returns a list of all policies defined for the current tenant.
+
+### Sync YAML Policies
+`POST /api/policies/sync-yaml`
+
+Uploads a YAML configuration file to bulk-update policies for multiple agents at once.
+
+## Approvals (HITL) API
+
+### List Pending Approvals
+`GET /api/policies/approvals`
+
+Returns a list of all tool execution requests currently suspended and waiting for human approval.
+
+### Resolve Approval
+`POST /api/policies/approvals/{id}/resolve?action={approved|rejected}`
+
+Resolves a pending tool call.
+
+- **`approved`**: The suspended stream resumes, and the LLM response is forwarded to the agent.
+- **`rejected`**: The stream is terminated with a system block message.

@@ -43,7 +43,8 @@ export default function TenantSettings({ tenantId, jwtToken }: { tenantId: strin
         dlp_api_key: config.dlp_api_key,
         monthly_budget: config.monthly_budget,
         siem_webhook_url: config.siem_webhook_url,
-        hitl_webhook_url: config.hitl_webhook_url
+        hitl_webhook_url: config.hitl_webhook_url,
+        mcp_upstream_url: config.mcp_upstream_url
       };
 
       const res = await fetch(`/api/policies/${tenantId}/config`, {
@@ -115,6 +116,14 @@ export default function TenantSettings({ tenantId, jwtToken }: { tenantId: strin
             <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">DLP API Key (Optional)</label>
             <input type="password" value={config.dlp_api_key || ""} onChange={(e) => setConfig({...config, dlp_api_key: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl" />
           </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">DLP Sensitivity Level</label>
+            <select value={config.dlp_sensitivity || "high"} onChange={(e) => setConfig({...config, dlp_sensitivity: e.target.value})} className="w-full px-4 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl outline-none">
+              <option value="high">High (Strict PII & Danger)</option>
+              <option value="medium">Medium (Clear PII & Danger)</option>
+              <option value="low">Low (Destructive Commands Only)</option>
+            </select>
+          </div>
           <div className="md:col-span-2">
             <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">SIEM Log Export Webhook</label>
             <input type="text" value={config.siem_webhook_url || ""} onChange={(e) => setConfig({...config, siem_webhook_url: e.target.value})} placeholder="https://..." className="w-full px-4 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl" />
@@ -122,6 +131,10 @@ export default function TenantSettings({ tenantId, jwtToken }: { tenantId: strin
           <div className="md:col-span-2">
             <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">HITL Alerts Webhook (Slack/Teams)</label>
             <input type="text" value={config.hitl_webhook_url || ""} onChange={(e) => setConfig({...config, hitl_webhook_url: e.target.value})} placeholder="https://..." className="w-full px-4 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">MCP Upstream URL (Optional)</label>
+            <input type="text" value={config.mcp_upstream_url || ""} onChange={(e) => setConfig({...config, mcp_upstream_url: e.target.value})} placeholder="http://localhost:8080" className="w-full px-4 py-2 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-xl" />
           </div>
         </div>
 
