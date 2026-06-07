@@ -2,7 +2,7 @@
   <img src="logo.png" alt="Agent Firewall Logo" width="120" />
 </p>
 
-<h1 align="center">Agent Firewall 🛡️</h1>
+<h1 align="center">Zero Trust Agents</h1>
 
 <p align="center">
   <strong>The definitive security and observability control plane for Autonomous AI Agents.</strong>
