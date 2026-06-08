@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 from policy_engine import check_policy, log_tool_call
 from proxy import forward_to_upstream
 
-CONTROL_PLANE_URL = os.getenv("CONTROL_PLANE_URL", "http://localhost:8001")
+CONTROL_PLANE_URL = os.getenv("API_URL", "http://localhost:8001")
 
 router = APIRouter(prefix="/v1", tags=["OpenAI Proxy"])
 
@@ -286,7 +286,8 @@ async def chat_completions_proxy(request: Request):
                             yield f"data: {json.dumps({'id': 'chunk', 'choices': [{'delta': {'tool_calls': [tc]}}]})}\n\n"
                         else:
                             # Send block message
-                            yield f"data: {json.dumps({'id': 'chunk', 'choices': [{'delta': {'content': f'\\n\\n[{block_reason}]'}, 'finish_reason': 'stop'}]})}\n\n"
+                            msg_text = f"\n\n[{block_reason}]"
+                            yield f"data: {json.dumps({'id': 'chunk', 'choices': [{'delta': {'content': msg_text}, 'finish_reason': 'stop'}]})}\n\n"
                 
                 yield "data: [DONE]\n\n"
             except Exception as e:

@@ -50,6 +50,19 @@ def sync(file: str):
     except Exception as e:
         console.print(f"[red]Failed to sync policies: {e}[/red]")
 
+@app.command("audit-trail")
+def audit_trail(limit: int = 20):
+    """View SOC2 compliance admin audit trails."""
+    client = get_client()
+    try:
+        trails = client.logs.get_audit_trail(limit=limit)
+        table = Table("Time", "Admin", "Action", "Target")
+        for t in trails:
+            table.add_row(t.get("timestamp", ""), t.get("user_id", ""), t.get("action", ""), t.get("target_resource", ""))
+        console.print(table)
+    except Exception as e:
+        console.print(f"[red]Failed to fetch audit trails: {e}[/red]")
+
 @app.command()
 def logs(limit: int = 20):
     """Tail recent audit logs."""
@@ -104,6 +117,19 @@ def apply_template(name: str, agent_id: str):
         console.print(f"[green]Successfully applied template '{name}' to agent '{agent_id}' ({resp.get('synced', 0)} policies created).[/green]")
     except Exception as e:
         console.print(f"[red]Failed to apply template: {e}[/red]")
+
+agents_app = typer.Typer(help="Manage agents and their configurations")
+app.add_typer(agents_app, name="agents")
+
+@agents_app.command("set-budget")
+def set_agent_budget(agent_id: str, limit: int):
+    """Set a hard budget limit (in cents) for a specific agent."""
+    client = get_client()
+    try:
+        client.config.set_agent_budget(agent_id, limit)
+        console.print(f"[green]Successfully set budget limit for agent '{agent_id}' to {limit} cents[/green]")
+    except Exception as e:
+        console.print(f"[red]Failed to set agent budget: {e}[/red]")
 
 if __name__ == "__main__":
     app()

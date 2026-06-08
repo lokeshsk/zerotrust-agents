@@ -151,14 +151,15 @@ turbo run dev --filter=docs
 ```
 
 ## Open Source vs Enterprise Edition
-ZeroTrust Agents operates on an Open Core model. 
+ZeroTrust Agents (ZTA) operates on an Open Core model. 
 
 * **Community Edition (Open Source)**: Includes the core firewall proxy, semantic DLP, basic HITL flows, and master key authentication.
 * **Enterprise Edition (EE)**: Distributed privately for enterprise customers. Unlocks:
-  - Auth0 / Active Directory SSO
-  - Multi-Tenant Workspaces & RBAC
-  - Advanced SIEM Webhooks (Splunk/Datadog)
-  - Cost Controls & Hard Billing Budgets
+  - **Auth0 / Active Directory SSO**: Centralized identity with Just-in-Time (JIT) provisioning.
+  - **Multi-Tenant Workspaces & Granular RBAC**: Isolate teams and enforce precise permissions (e.g., `policies:write`).
+  - **Advanced SIEM Webhooks**: Forward structured logs to Splunk or Datadog.
+  - **Hard Budget & Cost Controls**: Set granular financial limits (in cents) per agent. Automatically block LLM requests with `402 Payment Required` when budgets are exhausted.
+  - **SOC2 Audit Trails**: Immutable before-and-after snapshots of all administrative actions, easily accessible via the API or CLI (`zta audit-trail`).
 
 *If you are interested in an Enterprise License, please visit our website at [zerotrust-agents.com](https://zerotrust-agents.com).*
 

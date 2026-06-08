@@ -8,9 +8,11 @@ import logging
 
 from policy_engine import check_policy, log_tool_call
 from routers.openai_proxy import (
-    CONTROL_PLANE_URL, GATEWAY_SECRET, get_tenant_dlp_config, 
+    GATEWAY_SECRET, get_tenant_dlp_config, 
     semantic_dlp_check, is_rate_limited, REQUEST_COUNT, TOOL_CALL_COUNT, REQUEST_LATENCY
 )
+import os
+CONTROL_PLANE_URL = os.getenv("API_URL", "http://localhost:8001")
 import litellm
 
 logger = logging.getLogger(__name__)
@@ -192,8 +194,9 @@ async def messages_proxy(request: Request):
                                 yield f'event: content_block_delta\ndata: {json.dumps({"type": "content_block_delta", "index": content_index + 1 + idx, "delta": {"type": "input_json_delta", "partial_json": arguments}})}\n\n'
                                 yield f'event: content_block_stop\ndata: {json.dumps({"type": "content_block_stop", "index": content_index + 1 + idx})}\n\n'
                             else:
+                                msg_text = f"\n\n[{block_reason}]"
                                 yield f'event: content_block_start\ndata: {json.dumps({"type": "content_block_start", "index": content_index + 1 + idx, "content_block": {"type": "text", "text": ""}})}\n\n'
-                                yield f'event: content_block_delta\ndata: {json.dumps({"type": "content_block_delta", "index": content_index + 1 + idx, "delta": {"type": "text_delta", "text": f"\\n\\n[{block_reason}]"}})}\n\n'
+                                yield f'event: content_block_delta\ndata: {json.dumps({"type": "content_block_delta", "index": content_index + 1 + idx, "delta": {"type": "text_delta", "text": msg_text}})}\n\n'
                                 yield f'event: content_block_stop\ndata: {json.dumps({"type": "content_block_stop", "index": content_index + 1 + idx})}\n\n'
 
                     yield f'event: message_delta\ndata: {json.dumps({"type": "message_delta", "delta": {"stop_reason": "end_turn"}})}\n\n'

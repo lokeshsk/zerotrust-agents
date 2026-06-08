@@ -1,0 +1,55 @@
+name: Security Evaluations
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-labs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Start ZTA Stack & Sandbox
+      run: |
+        # Start core API, Gateway, DB, Redis, and Sandbox
+        docker compose -f docker-compose.yml -f docker-compose.labs.yml up -d db redis api gateway sandbox
+        
+        # Wait for services to be ready
+        echo "Waiting for Gateway to be ready..."
+        sleep 15
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Lab Dependencies
+      run: |
+        cd apps/security-labs
+        pip install -r requirements.txt
+        
+    - name: Run Evasion Evaluations
+      env:
+        ZTA_GATEWAY_URL: "http://localhost:8000/v1/chat/completions"
+        AGENT_API_KEY: "sk-default"
+        # We need to simulate the OpenAI API locally or pass a dummy key
+        # In a real CI, you'd use a mock LLM or pass secrets
+        OPENAI_API_KEY: "dummy-key-for-ci"
+      run: |
+        cd apps/security-labs
+        # We run the scripts directly for now
+        python evaluations/prompt_injections.py
+        python evaluations/semantic_evasion.py
+        python evaluations/data_exfiltration.py
+        
+    - name: Stop ZTA Stack
+      if: always()
+      run: |
+        docker compose -f docker-compose.yml -f docker-compose.labs.yml down

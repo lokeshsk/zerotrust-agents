@@ -147,6 +147,30 @@ def get_agent(tenant_id: str, agent_id: str, db: Session = Depends(get_db), gate
         "current_spend": agent.current_spend
     }
 
+class AgentBudgetUpdate(schemas.BaseModel):
+    budget_limit: int
+
+@router.post("/{tenant_id}/agents/{agent_id}/budget")
+def update_agent_budget(tenant_id: str, agent_id: str, payload: AgentBudgetUpdate, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_permission("settings:write"))):
+    agent = db.query(models.AgentDB).filter(
+        models.AgentDB.id == agent_id,
+        models.AgentDB.tenant_id == tenant_id
+    ).first()
+    
+    if not agent:
+        agent = models.AgentDB(
+            id=agent_id,
+            tenant_id=tenant_id,
+            name=agent_id,
+            budget_limit=payload.budget_limit
+        )
+        db.add(agent)
+    else:
+        agent.budget_limit = payload.budget_limit
+        
+    db.commit()
+    return {"status": "ok", "budget_limit": payload.budget_limit}
+
 @router.post("/", response_model=schemas.PolicyResponse)
 def create_policy(policy: schemas.PolicyCreate, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_permission("policies:write"))):
     # Check if exists to perform an upsert

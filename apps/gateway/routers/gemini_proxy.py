@@ -7,9 +7,11 @@ import logging
 
 from policy_engine import check_policy, log_tool_call
 from routers.openai_proxy import (
-    CONTROL_PLANE_URL, GATEWAY_SECRET, get_tenant_dlp_config, 
+    GATEWAY_SECRET, get_tenant_dlp_config, 
     semantic_dlp_check, is_rate_limited, REQUEST_COUNT, TOOL_CALL_COUNT, REQUEST_LATENCY
 )
+import os
+CONTROL_PLANE_URL = os.getenv("API_URL", "http://localhost:8001")
 import litellm
 
 logger = logging.getLogger(__name__)

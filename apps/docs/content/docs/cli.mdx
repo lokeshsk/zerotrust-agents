@@ -37,6 +37,14 @@ To fetch the most recent audit logs and see what tools your agents are trying to
 zta logs --limit 50
 ```
 
+## SOC2 Audit Trails (Enterprise Edition)
+
+To fetch immutable administrative audit logs tracking policy changes and configuration updates for SOC2 compliance:
+
+```bash
+zta audit-trail --limit 20
+```
+
 ## Human-in-the-Loop Approvals
 
 You can list all pending Human-in-the-Loop requests that require administrator approval:
@@ -51,4 +59,12 @@ To configure Slack or Discord to receive a webhook notification whenever an agen
 
 ```bash
 zta config-set hitl_webhook_url https://hooks.slack.com/services/...
+```
+
+## Agent Billing Controls (Enterprise Edition)
+
+To configure strict budget limits (in cents) for specific autonomous agents:
+
+```bash
+zta agents set-budget data-analyst-agent 500
 ```

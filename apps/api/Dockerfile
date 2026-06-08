@@ -11,7 +11,9 @@ ENV PATH="/root/.local/bin:$PATH"
 
 COPY requirements.txt .
 # Install dependencies into system environment for Docker
-RUN uv pip install --system -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+# Force install extra dependencies to ensure they are available.
+RUN pip install --no-cache-dir httpx passlib[bcrypt] python-multipart
 
 COPY . .
 

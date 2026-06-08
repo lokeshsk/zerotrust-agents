@@ -1,0 +1,9 @@
+openai
+anthropic
+requests
+pytest
+rich
+fastapi
+uvicorn
+sqlalchemy
+pydantic

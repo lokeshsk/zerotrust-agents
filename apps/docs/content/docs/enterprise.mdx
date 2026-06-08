@@ -1,16 +1,49 @@
 ---
-title: Enterprise Features
-description: Features in ZeroTrust Agents Enterprise Edition
+title: Enterprise Edition
+description: Advanced features for multi-tenant organizations and strict compliance requirements.
 ---
 
-ZeroTrust Agents Enterprise Edition (EE) is designed for organizations requiring centralized security controls, compliance auditing, and high availability.
+ZeroTrust Agents (ZTA) operates on an Open Core model. While the Community Edition provides powerful firewall capabilities, **ZeroTrust Agents Enterprise Edition (EE)** unlocks a suite of features designed for large-scale deployments, SaaS companies, and strictly regulated industries.
 
-## Capabilities Overview
+## Auth0 & SAML Single Sign-On (SSO)
 
-*   **SSO & Identity Management**: Integrate with Active Directory, Okta, or any SAML/OIDC provider via Auth0.
-*   **Multi-Tenant Workspaces**: Isolate policies, logs, and rate limit structures for different teams and business units.
-*   **Advanced DLP Engine**: Enterprise-grade semantic scanning using custom models, compliance filters (HIPAA, PCI), and high-throughput vector cache.
+The Enterprise Edition completely disables the local "master key" authentication for the dashboard and mandates SSO.
 
-## Getting a License
+- **Just-in-Time (JIT) Provisioning**: Users who log in via Auth0 or Active Directory are automatically provisioned with a `UserDB` record and mapped to the appropriate `RoleBindingDB`.
+- **Identity Provider (IdP) Agnostic**: Easily integrates with Okta, PingIdentity, Auth0, or Azure AD.
 
-For pricing and license keys, contact our sales department at [hello@zerotrust-agents.com](mailto:hello@zerotrust-agents.com).
+## Granular RBAC Permissions
+
+Instead of simple "admin" or "developer" checks, ZTA EE implements a fine-grained permission engine.
+
+- Custom Roles: You can map specific actions (like `policies:write`, `logs:read`, `billing:write`, `settings:write`) to custom roles.
+- Cross-Tenant Isolation: Roles are strictly bound to a `tenant_id`, allowing a single deployment to securely serve multiple distinct organizations or internal teams.
+
+## Advanced Token Billing & Agent Budgets
+
+Managing costs at scale is critical when dealing with autonomous agents.
+
+- **Model-Specific Pricing Matrices**: Automatically calculate precise costs based on the specific LLM being used (e.g., GPT-4o vs Claude 3.5 Sonnet).
+- **Hard Agent Budgets**: Set strict spending limits (in cents) for *specific agents*. 
+- **Native Proxy Blocking**: If a tenant or an agent exceeds their budget, the ZeroTrust Gateway natively blocks upstream LLM requests with a `402 Payment Required` HTTP response, protecting your organization from runaway AI loops.
+
+```bash
+# Example: Set a $5.00 limit for a specific agent
+zta agents set-budget data-analyst-agent 500
+```
+
+## SOC2 Audit Trails
+
+For organizations requiring strict compliance, ZTA EE tracks every administrative action.
+
+- **Immutable Logs**: Every time a user creates, updates, or deletes a security policy or modifies the tenant configuration (like DLP sensitivity), an immutable `AdminAuditTrailDB` record is generated.
+- **Before & After Snapshots**: The system captures full JSON snapshots of the state before and after the modification, providing total clarity for SOC2 auditors.
+
+```bash
+# Example: View the SOC2 audit trail
+zta audit-trail --limit 20
+```
+
+---
+
+*If you are interested in an Enterprise License, please visit our website at [zerotrust-agents.com](https://zerotrust-agents.com).*
