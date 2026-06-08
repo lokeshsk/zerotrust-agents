@@ -182,17 +182,32 @@ def list_approvals(x_tenant_id: str = Header(default="default", alias="x-tenant-
 import requests
 from fastapi import BackgroundTasks
 from routers.ws import manager
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+try:
+    from ee.integrations.slack import send_slack_hitl_message
+    from ee.integrations.discord import send_discord_hitl_message
+except ImportError:
+    send_slack_hitl_message = None
+    send_discord_hitl_message = None
 
 async def broadcast_approval(approval_data: dict):
     await manager.broadcast({"type": "NEW_APPROVAL", "data": approval_data})
 
 def send_hitl_webhook(url: str, payload: dict):
     try:
-        # Format for generic webhook, but could be adapted for Slack Block Kit
-        message = {
-            "text": f"*HITL Approval Required*\nAgent `{payload['agent_id']}` wants to use `{payload['tool_name']}`.\n*Arguments:* `{payload['arguments']}`\n*Approval ID:* `{payload['id']}`"
-        }
-        requests.post(url, json=message, timeout=2.0)
+        if "hooks.slack.com" in url and send_slack_hitl_message:
+            send_slack_hitl_message(url, payload)
+        elif "discord.com/api/webhooks" in url and send_discord_hitl_message:
+            send_discord_hitl_message(url, payload)
+        else:
+            # Format for generic webhook
+            message = {
+                "text": f"*HITL Approval Required*\nAgent `{payload['agent_id']}` wants to use `{payload['tool_name']}`.\n*Arguments:* `{payload['arguments']}`\n*Approval ID:* `{payload['id']}`"
+            }
+            requests.post(url, json=message, timeout=2.0)
     except Exception as e:
         print(f"HITL Webhook failed: {e}")
 

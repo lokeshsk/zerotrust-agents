@@ -12,15 +12,17 @@ router = APIRouter(prefix="/logs", tags=["Audit Logs"])
 import requests
 from fastapi import BackgroundTasks
 from routers.ws import manager
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+try:
+    from ee.integrations.siem import send_siem_event
+except ImportError:
+    send_siem_event = None
 
 async def broadcast_log(log_data: dict):
     await manager.broadcast({"type": "NEW_LOG", "data": log_data})
-
-def send_siem_webhook(url: str, payload: dict):
-    try:
-        requests.post(url, json=payload, timeout=2.0)
-    except Exception as e:
-        print(f"SIEM Webhook failed: {e}")
 
 @router.post("/", response_model=schemas.LogResponse)
 def create_log(log: schemas.LogCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db), gateway: bool = Depends(verify_gateway)):
@@ -31,10 +33,9 @@ def create_log(log: schemas.LogCreate, background_tasks: BackgroundTasks, db: Se
     tenant = db.query(models.TenantDB).filter(models.TenantDB.id == log.tenant_id).first()
     if tenant:
         tenant.events_this_month += 1
-        if tenant.siem_webhook_url:
+        if tenant.siem_webhook_url and send_siem_event:
             payload = log.model_dump()
-            payload["event_type"] = "audit_log"
-            background_tasks.add_task(send_siem_webhook, tenant.siem_webhook_url, payload)
+            background_tasks.add_task(send_siem_event, tenant.siem_webhook_url, "audit_log", payload)
         
     db.commit()
     db.refresh(db_log)

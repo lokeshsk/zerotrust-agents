@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import models
 from database import engine
-from routers import policies, logs, auth, tenants, ws
+from routers import policies, logs, auth, tenants, ws, integrations
 import time
 
 # Rely on Alembic for database migrations in production
@@ -33,6 +33,7 @@ app.include_router(logs.router)
 app.include_router(auth.router)
 app.include_router(tenants.router)
 app.include_router(ws.router)
+app.include_router(integrations.router)
 
 @app.get("/")
 def read_root():

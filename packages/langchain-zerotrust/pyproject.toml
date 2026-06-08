@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "langchain-zerotrust"
+version = "0.1.0"
+authors = [
+  { name="ZeroTrust Agents", email="hello@zerotrust-agents.com" },
+]
+description = "LangChain middleware and callbacks for ZeroTrust Agents"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "langchain-core>=0.1.0",
+    "zerotrust-agents-sdk>=0.1.0",
+]
+
+[project.urls]
+"Homepage" = "https://zerotrust-agents.com"
+"Bug Tracker" = "https://github.com/lokeshsk/zerotrust-agents/issues"
