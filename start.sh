@@ -2,7 +2,7 @@
 set -e
 
 # ==============================================================================
-# Agent Firewall - 1-Click Installation & Startup Script
+# ZeroTrust Agents - 1-Click Installation & Startup Script
 # ==============================================================================
 
 # Formatting utilities
@@ -13,7 +13,7 @@ RED="\033[31m"
 RESET="\033[0m"
 
 echo -e "${BLUE}${BOLD}=============================================${RESET}"
-echo -e "${BLUE}${BOLD}   🛡️  Agent Firewall Launcher 🛡️          ${RESET}"
+echo -e "${BLUE}${BOLD}   🛡️  ZeroTrust Agents Launcher 🛡️          ${RESET}"
 echo -e "${BLUE}${BOLD}=============================================${RESET}"
 echo ""
 
@@ -23,7 +23,7 @@ if [ ! -f ".env" ]; then
     cp .env.example .env
 fi
 
-echo "How would you like to run the Agent Firewall?"
+echo "How would you like to run the ZeroTrust Agents?"
 echo -e "  ${GREEN}[1] Docker Compose (Recommended - 1 Click)${RESET}"
 echo "  [2] Natively on Host (Requires local PostgreSQL)"
 echo ""

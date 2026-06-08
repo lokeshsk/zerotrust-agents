@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agent Firewall | ZeroTrust AI",
+  title: "ZeroTrust Agents | ZeroTrust AI",
   description: "Enterprise Security Command Center for AI Agents",
 };
 

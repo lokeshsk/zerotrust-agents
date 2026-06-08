@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="agent-firewall",
+    name="zerotrust-agents",
     version="0.1.0",
     description="Python SDK for ZeroTrust Agents Firewall",
     author="ZeroTrust Agents",

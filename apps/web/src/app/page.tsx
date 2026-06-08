@@ -295,7 +295,7 @@ export default function Home() {
               <span>Enterprise SSO (Auth0)</span>
             </button>
             <p className="text-center text-xs mt-3 text-slate-500">
-              Requires <a href="/enterprise" className="text-indigo-600 hover:underline">Agent Firewall EE</a>
+              Requires <a href="/enterprise" className="text-indigo-600 hover:underline">ZeroTrust Agents EE</a>
             </p>
           </form>
         </div>

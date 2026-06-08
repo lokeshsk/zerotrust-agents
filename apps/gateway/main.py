@@ -19,7 +19,7 @@ except ImportError:
 
 logger.info(f"--- Enterprise Edition Active: {EE_ACTIVE} ---")
 
-app = FastAPI(title="Agent Firewall Gateway Proxy")
+app = FastAPI(title="ZeroTrust Agents Gateway Proxy")
 
 # Include modular routers
 app.include_router(openai_proxy.router)

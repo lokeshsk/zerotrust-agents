@@ -1,6 +1,6 @@
-# Agent Firewall Enterprise License
+# ZeroTrust Agents Enterprise License
 
-This directory (`ee/`) contains proprietary Enterprise Edition code for Agent Firewall.
+This directory (`ee/`) contains proprietary Enterprise Edition code for ZeroTrust Agents.
 
 Unlike the rest of the repository which is available under the standard open-source license, the code contained in this directory and its subdirectories is **Source-Available but NOT Open-Source**.
 

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Agent Firewall Logo" width="120" />
+  <img src="logo.png" alt="ZeroTrust Agents Logo" width="120" />
 </p>
 
 <h1 align="center">Zero Trust Agents</h1>
@@ -19,7 +19,7 @@
 TODO: Add Demo GIF or YouTube Video embed here
 Example: 
 <p align="center">
-  <a href="https://youtu.be/YOUR_VIDEO_ID"><img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg" alt="Agent Firewall Demo" width="800"></a>
+  <a href="https://youtu.be/YOUR_VIDEO_ID"><img src="https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg" alt="ZeroTrust Agents Demo" width="800"></a>
 </p>
 -->
 
@@ -59,7 +59,7 @@ ZeroTrust Agents is completely self-hosted, meaning you control the keys!
 
 ## Quickstart
 
-Getting started is easy. You can run the entire Agent Firewall stack (Gateway, API, Database, and Dashboard) locally with a single command.
+Getting started is easy. You can run the entire ZeroTrust Agents stack (Gateway, API, Database, and Dashboard) locally with a single command.
 
 ### 1. 1-Click Launch
 We provide an interactive launcher that manages dependencies for you.
@@ -117,7 +117,7 @@ APP_URL="http://localhost:3000"
 
 ```mermaid
 graph TD
-    A[Autonomous AI Agent] -->|Tool Call Request| G[Agent Firewall Gateway]
+    A[Autonomous AI Agent] -->|Tool Call Request| G[ZeroTrust Agents Gateway]
     
     subgraph Control Plane
     G <-->|Policy Check| API[FastAPI Server]
@@ -151,7 +151,7 @@ turbo run dev --filter=docs
 ```
 
 ## Open Source vs Enterprise Edition
-Agent Firewall operates on an Open Core model. 
+ZeroTrust Agents operates on an Open Core model. 
 
 * **Community Edition (Open Source)**: Includes the core firewall proxy, semantic DLP, basic HITL flows, and master key authentication.
 * **Enterprise Edition (EE)**: Distributed privately for enterprise customers. Unlocks:

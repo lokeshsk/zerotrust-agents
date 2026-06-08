@@ -17,7 +17,7 @@ if not db.query(models.TenantDB).filter(models.TenantDB.id == "default").first()
     db.commit()
 db.close()
 
-app = FastAPI(title="Agent Firewall Control Plane")
+app = FastAPI(title="ZeroTrust Agents Control Plane")
 
 app.add_middleware(
     CORSMiddleware,

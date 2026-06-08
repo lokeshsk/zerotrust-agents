@@ -16,7 +16,7 @@ export default function EnterprisePricing() {
           </Link>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Scale Your AI Security</h1>
           <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-            Upgrade to Agent Firewall Enterprise Edition to unlock SSO, Role-Based Access Control, and multi-tenant capabilities for your AI workforce.
+            Upgrade to ZeroTrust Agents Enterprise Edition to unlock SSO, Role-Based Access Control, and multi-tenant capabilities for your AI workforce.
           </p>
         </div>
 

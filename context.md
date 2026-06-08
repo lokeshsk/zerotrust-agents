@@ -1,6 +1,6 @@
-# Agent Firewall Context & Handoff
+# ZeroTrust Agents Context & Handoff
 
-This document provides exact technical context for future AI assistants or developers resuming work on the Agent Firewall project. It explains where we are, what we are building, and what needs to happen next.
+This document provides exact technical context for future AI assistants or developers resuming work on the ZeroTrust Agents project. It explains where we are, what we are building, and what needs to happen next.
 
 ## 1. What Are We Building?
 We are building an Enterprise Security Gateway for AI Agents. It intercepts LLM API traffic, evaluates tool/function calls against a Policy Engine, and blocks unauthorized or malicious requests. We are explicitly building this to be a multi-tenant B2B SaaS product capable of charging enterprise organizations based on traffic volume.

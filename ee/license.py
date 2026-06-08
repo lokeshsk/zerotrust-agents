@@ -35,7 +35,7 @@ def verify_license(key: str) -> bool:
             key, 
             EE_PUBLIC_KEY, 
             algorithms=["RS256"],
-            audience="agent-firewall-ee"
+            audience="zerotrust-agents-ee"
         )
         
         # Optionally check if payload["plan"] == "enterprise"
