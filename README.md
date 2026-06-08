@@ -56,8 +56,8 @@ Getting started is easy. You can run the entire Agent Firewall stack (Gateway, A
 We provide an interactive launcher that manages dependencies for you.
 
 ```bash
-git clone https://github.com/lokeshsk/agent-firewall.git
-cd agent-firewall
+git clone https://github.com/lokeshsk/zerotrust-agents.git
+cd zerotrust-agents
 chmod +x start.sh
 
 # Run the interactive setup!
