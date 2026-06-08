@@ -163,6 +163,22 @@ export default async function Home() {
               <h3 className="text-xl font-bold mb-3">Developer SDK & CLI</h3>
               <p className="text-slate-400 leading-relaxed">Treat policies as code. Use the powerful Python SDK and `zta` CLI to version control your rules and automate deployments.</p>
             </div>
+            
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-yellow-500/30 transition-colors">
+              <div className="w-12 h-12 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 border border-yellow-500/20">
+                <svg className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              </div>
+              <h3 className="text-xl font-bold mb-3">Anomaly Detection</h3>
+              <p className="text-slate-400 leading-relaxed">Automatically detect and rate-limit agents that flood the gateway with aggressive tool executions or potential exfiltration bursts.</p>
+            </div>
+
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-red-500/30 transition-colors">
+              <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mb-6 border border-red-500/20">
+                <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+              </div>
+              <h3 className="text-xl font-bold mb-3">Interactive Security Labs</h3>
+              <p className="text-slate-400 leading-relaxed">Test the Firewall offline against automated red-teaming scripts (Prompt Injections, Roleplay DANs, Hex obfuscation) in an isolated Docker sandbox.</p>
+            </div>
           </div>
         </div>
       </section>

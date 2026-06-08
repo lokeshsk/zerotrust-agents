@@ -10,6 +10,7 @@
     "templates",
     "cli",
     "api",
+    "security-labs",
     "enterprise"
   ]
 }

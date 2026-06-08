@@ -1,0 +1,47 @@
+---
+title: Interactive Security Labs
+description: Test the Firewall against simulated malicious agents
+---
+
+# Security Labs
+
+ZeroTrust Agents includes an interactive **Security Labs** environment that allows you to safely test the Firewall against simulated malicious agents in an isolated Docker sandbox.
+
+## Architecture
+
+The Labs environment spins up a completely isolated **Vulnerable Target Server** (`mock_db.py`) containing a mock SQLite database pre-seeded with dummy PII (like SSNs and Emails). It intentionally exposes a vulnerable `/execute_sql` endpoint.
+
+Because it runs inside a Docker container orchestrated by `docker-compose.labs.yml`, any destructive commands (like dropping tables) only impact the ephemeral sandbox and will not harm your host machine.
+
+## Running the Evasion Tests
+
+We provide a suite of automated evaluation scripts that simulate a compromised AI agent trying to exploit the target application.
+
+### 1. Boot the Labs Stack
+
+Start both the core Gateway and the isolated Sandbox:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.labs.yml up --build -d
+```
+
+### 2. Run the Evaluation Scripts
+
+Install the lab requirements and run the red-teaming scripts:
+
+```bash
+cd apps/security-labs
+pip install -r requirements.txt
+
+# Run the Evasion tests
+python evaluations/prompt_injections.py
+python evaluations/semantic_evasion.py
+python evaluations/data_exfiltration.py
+```
+
+### What You Will See
+
+You will see the ZeroTrust Agents Firewall intercepting the malicious AI responses and blocking them in real-time using its defense-in-depth architecture:
+1. **Semantic DLP**: Blocks classic `DROP TABLE` injections and "DAN" prompts by parsing the intent of the payload.
+2. **Policy Enforcement**: Blocks obfuscated payloads (like Hex encoding) if the agent lacks permissions to run specific tools.
+3. **Anomaly Detection**: Dynamically applies rate limits and suspends agents that flood the gateway with aggressive attacks.

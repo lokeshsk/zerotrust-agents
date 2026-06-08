@@ -48,6 +48,7 @@ As AI Agents become increasingly autonomous (executing SQL, calling external API
 - **🐍 Python SDK & CLI (`zta`)**: Official SDK (`zerotrust-agents-sdk`) to interact programmatically with the Firewall control plane, complete with a powerful CLI tool to sync policies, apply predefined security templates (e.g. `safe_github`), and manage approvals.
 - **🔔 Real-time Alerting**: Instantly fire webhooks to Slack or Discord whenever an agent attempts a high-risk action requiring Human-in-the-Loop approval.
 - **👥 Multi-Tenancy Setup**: The entire architecture is partitioned by `tenant_id`. Built from the ground-up to support SaaS deployments or internal enterprise isolation.
+- **🛡️ Interactive Security Labs**: Includes a sandboxed, containerized environment with automated Red-Teaming scripts to safely test prompt injections and data exfiltration evasions locally!
 - **🔒 Completely Offline**: Can be run entirely offline or air-gapped without relying on any external cloud backends.
 
 ## 🚀 Authentication & API Keys
