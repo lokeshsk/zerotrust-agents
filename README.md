@@ -1,4 +1,4 @@
-<p align="center">
+1<p align="center">
   <img src="logo.png" alt="Agent Firewall Logo" width="120" />
 </p>
 
@@ -102,7 +102,7 @@ graph TD
 
 ## MCP (Model Context Protocol)
 
-ZTA natively supports Anthropic's **Model Context Protocol (MCP)**.
+**ZTA** natively supports Anthropic's **Model Context Protocol (MCP)**.
 Instead of giving LLMs unmitigated direct access to your local filesystem or databases, you can route your MCP connections through the Firewall.
 The Gateway intercepts the JSON-RPC messages, inspects the `CallToolRequest`, and blocks actions like `write_file` or `execute_query` based on your policies, all while keeping the connection stateful.
 
