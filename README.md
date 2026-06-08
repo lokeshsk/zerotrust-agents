@@ -1,4 +1,4 @@
-1<p align="center">
+<p align="center">
   <img src="logo.png" alt="Agent Firewall Logo" width="120" />
 </p>
 
