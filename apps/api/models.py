@@ -80,3 +80,29 @@ class RoleBindingDB(Base):
     user_id = Column(String, ForeignKey("users.id"), index=True)
     tenant_id = Column(String, ForeignKey("tenants.id"), index=True)
     role = Column(String) # 'owner', 'admin', 'auditor', 'developer'
+
+class PermissionDB(Base):
+    __tablename__ = "permissions"
+    id = Column(Integer, primary_key=True)
+    role = Column(String, index=True)
+    permission = Column(String, index=True) # e.g. 'policies:read', 'policies:write'
+
+class AgentDB(Base):
+    __tablename__ = "agents"
+    id = Column(String, primary_key=True, index=True) # e.g. 'agent_xyz'
+    tenant_id = Column(String, ForeignKey("tenants.id"), index=True)
+    name = Column(String)
+    budget_limit = Column(Integer, default=0) # e.g. 0 means no limit
+    current_spend = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class AdminAuditTrailDB(Base):
+    __tablename__ = "admin_audit_trails"
+    id = Column(Integer, primary_key=True, index=True)
+    tenant_id = Column(String, ForeignKey("tenants.id"), index=True)
+    user_id = Column(String, index=True) # ID of the admin who made the change
+    action = Column(String) # e.g. 'policy_created', 'config_updated'
+    target_resource = Column(String) # e.g. 'policy:agent_x:tool_y'
+    before_state = Column(String, nullable=True) # JSON snapshot
+    after_state = Column(String, nullable=True) # JSON snapshot
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())

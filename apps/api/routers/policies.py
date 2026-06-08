@@ -4,7 +4,7 @@ from typing import List
 
 import models, schemas
 from database import get_db
-from routers.auth import verify_jwt, verify_gateway, require_role
+from routers.auth import verify_jwt, verify_gateway, require_permission
 from fastapi import Header
 
 router = APIRouter(prefix="/policies", tags=["Policies"])
@@ -46,10 +46,21 @@ def get_tenant_config(tenant_id: str, db: Session = Depends(get_db), gateway: bo
     }
 
 @router.post("/{tenant_id}/config")
-def update_tenant_config(tenant_id: str, config: schemas.TenantConfigUpdate, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_role("admin"))):
+def update_tenant_config(tenant_id: str, config: schemas.TenantConfigUpdate, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_permission("settings:write"))):
     tenant = db.query(models.TenantDB).filter(models.TenantDB.id == tenant_id).first()
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
+        
+    before_state = {
+        "dlp_model": tenant.dlp_model,
+        "dlp_api_base": tenant.dlp_api_base,
+        "dlp_api_key": tenant.dlp_api_key,
+        "dlp_sensitivity": tenant.dlp_sensitivity,
+        "monthly_budget": tenant.monthly_budget,
+        "siem_webhook_url": tenant.siem_webhook_url,
+        "hitl_webhook_url": tenant.hitl_webhook_url,
+        "mcp_upstream_url": tenant.mcp_upstream_url
+    }
         
     if config.dlp_model is not None: tenant.dlp_model = config.dlp_model
     if config.dlp_api_base is not None: tenant.dlp_api_base = config.dlp_api_base
@@ -60,10 +71,33 @@ def update_tenant_config(tenant_id: str, config: schemas.TenantConfigUpdate, db:
     if config.hitl_webhook_url is not None: tenant.hitl_webhook_url = config.hitl_webhook_url
     if config.mcp_upstream_url is not None: tenant.mcp_upstream_url = config.mcp_upstream_url
     
+    after_state = {
+        "dlp_model": tenant.dlp_model,
+        "dlp_api_base": tenant.dlp_api_base,
+        "dlp_api_key": tenant.dlp_api_key,
+        "dlp_sensitivity": tenant.dlp_sensitivity,
+        "monthly_budget": tenant.monthly_budget,
+        "siem_webhook_url": tenant.siem_webhook_url,
+        "hitl_webhook_url": tenant.hitl_webhook_url,
+        "mcp_upstream_url": tenant.mcp_upstream_url
+    }
+    
+    import json
+    audit = models.AdminAuditTrailDB(
+        tenant_id=tenant_id,
+        user_id=role_binding.user_id,
+        action="config_updated",
+        target_resource=f"tenant:{tenant_id}",
+        before_state=json.dumps(before_state),
+        after_state=json.dumps(after_state)
+    )
+    db.add(audit)
+    
     db.commit()
     return {"status": "ok"}
 
 class UsageReport(schemas.BaseModel):
+    agent_id: str = "default"
     tokens: int
     cost: float
 
@@ -73,13 +107,48 @@ def report_usage(tenant_id: str, usage: UsageReport, db: Session = Depends(get_d
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
         
-    tenant.current_spend += int(usage.cost * 100) # Assuming cost is reported in dollars and stored in cents
+    cost_cents = int(usage.cost * 100)
+    tenant.current_spend += cost_cents
+    
+    agent = db.query(models.AgentDB).filter(
+        models.AgentDB.id == usage.agent_id,
+        models.AgentDB.tenant_id == tenant_id
+    ).first()
+    
+    if agent:
+        agent.current_spend += cost_cents
+    else:
+        # Auto-create agent record
+        agent = models.AgentDB(
+            id=usage.agent_id,
+            tenant_id=tenant_id,
+            name=usage.agent_id,
+            current_spend=cost_cents
+        )
+        db.add(agent)
+        
     db.commit()
     
     return {"status": "ok", "current_spend": tenant.current_spend}
 
+@router.get("/{tenant_id}/agents/{agent_id}")
+def get_agent(tenant_id: str, agent_id: str, db: Session = Depends(get_db), gateway: bool = Depends(verify_gateway)):
+    agent = db.query(models.AgentDB).filter(
+        models.AgentDB.id == agent_id,
+        models.AgentDB.tenant_id == tenant_id
+    ).first()
+    
+    if not agent:
+        return {"id": agent_id, "budget_limit": 0, "current_spend": 0}
+        
+    return {
+        "id": agent.id,
+        "budget_limit": agent.budget_limit,
+        "current_spend": agent.current_spend
+    }
+
 @router.post("/", response_model=schemas.PolicyResponse)
-def create_policy(policy: schemas.PolicyCreate, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_role("admin"))):
+def create_policy(policy: schemas.PolicyCreate, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_permission("policies:write"))):
     # Check if exists to perform an upsert
     existing = db.query(models.PolicyDB).filter(
         models.PolicyDB.tenant_id == policy.tenant_id,
@@ -87,20 +156,46 @@ def create_policy(policy: schemas.PolicyCreate, db: Session = Depends(get_db), r
         models.PolicyDB.tool_name == policy.tool_name
     ).first()
     
+    import json
+    before_state = None
+    
     if existing:
+        before_state = {"action": existing.action, "dsl_rules": existing.dsl_rules}
         existing.action = policy.action
+        
+        audit = models.AdminAuditTrailDB(
+            tenant_id=policy.tenant_id,
+            user_id=role_binding.user_id,
+            action="policy_updated",
+            target_resource=f"policy:{policy.agent_id}:{policy.tool_name}",
+            before_state=json.dumps(before_state),
+            after_state=json.dumps({"action": policy.action, "dsl_rules": policy.dsl_rules})
+        )
+        db.add(audit)
+        
         db.commit()
         db.refresh(existing)
         return existing
     
     db_policy = models.PolicyDB(**policy.model_dump())
     db.add(db_policy)
+    
+    audit = models.AdminAuditTrailDB(
+        tenant_id=policy.tenant_id,
+        user_id=role_binding.user_id,
+        action="policy_created",
+        target_resource=f"policy:{policy.agent_id}:{policy.tool_name}",
+        before_state=None,
+        after_state=json.dumps({"action": policy.action, "dsl_rules": policy.dsl_rules})
+    )
+    db.add(audit)
+    
     db.commit()
     db.refresh(db_policy)
     return db_policy
 
 @router.delete("/{tenant_id}/{agent_id}/{tool_name}")
-def delete_policy(tenant_id: str, agent_id: str, tool_name: str, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_role("admin"))):
+def delete_policy(tenant_id: str, agent_id: str, tool_name: str, db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_permission("policies:write"))):
     policy = db.query(models.PolicyDB).filter(
         models.PolicyDB.tenant_id == tenant_id,
         models.PolicyDB.agent_id == agent_id,
@@ -108,6 +203,18 @@ def delete_policy(tenant_id: str, agent_id: str, tool_name: str, db: Session = D
     ).first()
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
+        
+    import json
+    audit = models.AdminAuditTrailDB(
+        tenant_id=tenant_id,
+        user_id=role_binding.user_id,
+        action="policy_deleted",
+        target_resource=f"policy:{agent_id}:{tool_name}",
+        before_state=json.dumps({"action": policy.action, "dsl_rules": policy.dsl_rules}),
+        after_state=None
+    )
+    db.add(audit)
+    
     db.delete(policy)
     db.commit()
     return {"status": "deleted"}
@@ -134,7 +241,7 @@ async def sync_yaml_policies(
     file: UploadFile = File(...), 
     x_tenant_id: str = Header(default="default", alias="x-tenant-id"), 
     db: Session = Depends(get_db), 
-    role_binding: models.RoleBindingDB = Depends(require_role("admin"))
+    role_binding: models.RoleBindingDB = Depends(require_permission("policies:write"))
 ):
     try:
         content = await file.read()
@@ -238,7 +345,7 @@ def get_approval(approval_id: int, x_tenant_id: str = Header(default="default", 
     return approval
 
 @router.post("/approvals/{approval_id}/resolve")
-def resolve_approval(approval_id: int, action: str, x_tenant_id: str = Header(default="default", alias="x-tenant-id"), db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_role("admin"))):
+def resolve_approval(approval_id: int, action: str, x_tenant_id: str = Header(default="default", alias="x-tenant-id"), db: Session = Depends(get_db), role_binding: models.RoleBindingDB = Depends(require_permission("policies:write"))):
     tenant_id = x_tenant_id
     if action not in ["approved", "rejected"]:
         raise HTTPException(status_code=400, detail="Invalid action")

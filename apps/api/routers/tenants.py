@@ -6,7 +6,7 @@ import uuid
 
 import models
 from database import get_db
-from routers.auth import verify_jwt, verify_gateway, require_role
+from routers.auth import verify_jwt, verify_gateway, require_permission
 
 router = APIRouter(prefix="/tenants", tags=["Tenants"])
 
@@ -62,7 +62,7 @@ class MemberAdd(BaseModel):
     password: str # For MVP, specify password to create the user
 
 @router.get("/{tenant_id}/members", response_model=List[MemberResponse])
-def get_tenant_members(tenant_id: str, db: Session = Depends(get_db), role_binding = Depends(require_role("admin"))):
+def get_tenant_members(tenant_id: str, db: Session = Depends(get_db), role_binding = Depends(require_permission("settings:write"))):
     bindings = db.query(models.RoleBindingDB).filter(models.RoleBindingDB.tenant_id == tenant_id).all()
     results = []
     for b in bindings:
@@ -74,7 +74,7 @@ def get_tenant_members(tenant_id: str, db: Session = Depends(get_db), role_bindi
 from routers.auth import hash_password
 
 @router.post("/{tenant_id}/members")
-def add_tenant_member(tenant_id: str, payload: MemberAdd, db: Session = Depends(get_db), role_binding = Depends(require_role("admin"))):
+def add_tenant_member(tenant_id: str, payload: MemberAdd, db: Session = Depends(get_db), role_binding = Depends(require_permission("settings:write"))):
     user = db.query(models.UserDB).filter(models.UserDB.email == payload.email).first()
     if not user:
         user = models.UserDB(

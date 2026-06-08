@@ -190,10 +190,10 @@ async def chat_completions_proxy(request: Request):
     from main import EE_ACTIVE
     if EE_ACTIVE:
         from ee.billing import is_budget_exceeded, track_billing
-        if await is_budget_exceeded(tenant_id):
+        if await is_budget_exceeded(tenant_id, agent_id):
             REQUEST_COUNT.labels(agent_id=agent_id, status="budget_exceeded").inc()
             return JSONResponse(status_code=402, content={
-                "error": f"Enterprise Billing Alert: Tenant '{tenant_id}' has exceeded their monthly budget limit."
+                "error": f"Enterprise Billing Alert: Tenant '{tenant_id}' or Agent '{agent_id}' has exceeded their budget limit."
             })
 
     # Auto-Discovery: Intercept the 'tools' array in the payload and register them
@@ -295,7 +295,7 @@ async def chat_completions_proxy(request: Request):
         return StreamingResponse(stream_generator(), media_type="text/event-stream")
 
     if EE_ACTIVE:
-        track_billing(tenant_id, response_data)
+        track_billing(tenant_id, agent_id, response_data)
 
     # 3. Parse upstream response to see if the LLM wants to call a tool
     if "choices" in response_data and len(response_data["choices"]) > 0:

@@ -85,12 +85,28 @@ def verify_gateway(x_gateway_secret: str = Header(default=None)):
         raise HTTPException(status_code=401, detail="Invalid Gateway Secret")
     return True
 
-def require_role(required_role: str):
-    def role_checker(
+def seed_default_permissions(db: Session):
+    # Seed predefined roles and their permissions if they don't exist
+    defaults = {
+        "owner": ["policies:read", "policies:write", "logs:read", "billing:read", "billing:write", "settings:write"],
+        "admin": ["policies:read", "policies:write", "logs:read", "settings:write"],
+        "developer": ["policies:read", "logs:read"],
+        "auditor": ["logs:read", "policies:read"]
+    }
+    
+    if db.query(models.PermissionDB).count() == 0:
+        for role, perms in defaults.items():
+            for perm in perms:
+                db.add(models.PermissionDB(role=role, permission=perm))
+        db.commit()
+
+def require_permission(required_perm: str):
+    def permission_checker(
         x_tenant_id: str = Header(default="default", alias="x-tenant-id"),
         jwt_payload: dict = Depends(verify_jwt),
         db: Session = Depends(get_db)
     ):
+        seed_default_permissions(db) # Ensure seed runs
         user_id = jwt_payload.get("user_id") or jwt_payload.get("sub")
         if not user_id:
             # If the user is an admin from master key (fallback)
@@ -106,16 +122,17 @@ def require_role(required_role: str):
         if not role_binding:
             raise HTTPException(status_code=403, detail="User does not have access to this tenant")
             
-        # Simplistic hierarchy: owner > admin > developer > auditor
-        role_hierarchy = {"owner": 4, "admin": 3, "developer": 2, "auditor": 1}
-        user_level = role_hierarchy.get(role_binding.role, 0)
-        req_level = role_hierarchy.get(required_role, 0)
+        # Check permissions explicitly
+        has_perm = db.query(models.PermissionDB).filter(
+            models.PermissionDB.role == role_binding.role,
+            models.PermissionDB.permission == required_perm
+        ).first()
         
-        if user_level < req_level:
-            raise HTTPException(status_code=403, detail=f"Requires {required_role} role")
+        if not has_perm:
+            raise HTTPException(status_code=403, detail=f"Requires {required_perm} permission")
             
         return role_binding
-    return role_checker
+    return permission_checker
 
 @router.get("/setup-status")
 def setup_status(db: Session = Depends(get_db)):
@@ -138,6 +155,10 @@ def setup_admin(request: SetupRequest, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
+    from main import EE_ACTIVE
+    if EE_ACTIVE and AUTH0_DOMAIN:
+        raise HTTPException(status_code=403, detail="Enterprise Edition is active. Please use SSO (/login/sso) to authenticate.")
+        
     admin = db.query(models.AdminDB).first()
     if not admin:
         raise HTTPException(status_code=400, detail="Admin not setup")
@@ -201,11 +222,26 @@ async def auth_callback(code: str, db: Session = Depends(get_db)):
         access_token = tokens.get("access_token")
         id_token = tokens.get("id_token")
         
-        # In a full implementation, you would decode the id_token to extract user email
-        # and create/update UserDB and RoleBindingDB records here if needed.
-        # decoded_id_token = jwt.decode(id_token, options={"verify_signature": False})
-        # sub = decoded_id_token.get("sub")
-        # email = decoded_id_token.get("email")
+        if id_token:
+            decoded_id_token = jwt.decode(id_token, options={"verify_signature": False})
+            sub = decoded_id_token.get("sub")
+            email = decoded_id_token.get("email")
+
+            if sub and email:
+                user = db.query(models.UserDB).filter(models.UserDB.id == sub).first()
+                if not user:
+                    user = models.UserDB(id=sub, email=email)
+                    db.add(user)
+                    
+                    tenant = db.query(models.TenantDB).filter(models.TenantDB.id == "default").first()
+                    if not tenant:
+                        tenant = models.TenantDB(id="default", name="Default Tenant", api_key="sk-default")
+                        db.add(tenant)
+                        db.commit()
+                        
+                    role_binding = models.RoleBindingDB(user_id=sub, tenant_id="default", role="owner")
+                    db.add(role_binding)
+                    db.commit()
 
         # Redirect back to the frontend with the access_token
         return RedirectResponse(url=f"{APP_URL}/?token={access_token}")

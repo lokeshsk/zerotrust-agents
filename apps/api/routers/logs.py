@@ -4,7 +4,7 @@ from typing import List
 
 import models, schemas
 from database import get_db
-from routers.auth import verify_jwt, verify_gateway, require_role
+from routers.auth import verify_jwt, verify_gateway, require_permission
 from fastapi import Header
 
 router = APIRouter(prefix="/logs", tags=["Audit Logs"])
@@ -46,6 +46,24 @@ def create_log(log: schemas.LogCreate, background_tasks: BackgroundTasks, db: Se
     return db_log
 
 @router.get("/", response_model=List[schemas.LogResponse])
-def get_logs(x_tenant_id: str = Header(default="default", alias="x-tenant-id"), skip: int = 0, limit: int = 100, db: Session = Depends(get_db), role_binding = Depends(require_role("auditor"))):
+def get_logs(x_tenant_id: str = Header(default="default", alias="x-tenant-id"), skip: int = 0, limit: int = 100, db: Session = Depends(get_db), role_binding = Depends(require_permission("logs:read"))):
     tenant_id = x_tenant_id
     return db.query(models.AuditLogDB).filter(models.AuditLogDB.tenant_id == tenant_id).order_by(models.AuditLogDB.timestamp.desc()).offset(skip).limit(limit).all()
+
+@router.get("/audit-trail")
+def get_audit_trail(x_tenant_id: str = Header(default="default", alias="x-tenant-id"), skip: int = 0, limit: int = 100, db: Session = Depends(get_db), role_binding = Depends(require_permission("logs:read"))):
+    tenant_id = x_tenant_id
+    trails = db.query(models.AdminAuditTrailDB).filter(models.AdminAuditTrailDB.tenant_id == tenant_id).order_by(models.AdminAuditTrailDB.timestamp.desc()).offset(skip).limit(limit).all()
+    
+    return [
+        {
+            "id": t.id,
+            "tenant_id": t.tenant_id,
+            "user_id": t.user_id,
+            "action": t.action,
+            "target_resource": t.target_resource,
+            "before_state": t.before_state,
+            "after_state": t.after_state,
+            "timestamp": t.timestamp
+        } for t in trails
+    ]
