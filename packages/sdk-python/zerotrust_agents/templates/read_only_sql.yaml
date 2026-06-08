@@ -1,0 +1,5 @@
+policies:
+  - agent_id: "{{agent_id}}"
+    tool_name: "execute_sql"
+    action: "allow"
+    dsl_rules: '{"logic": "AND", "rules": [{"field": "arguments.query", "operator": "not_contains", "value": "DROP"}, {"field": "arguments.query", "operator": "not_contains", "value": "DELETE"}, {"field": "arguments.query", "operator": "not_contains", "value": "TRUNCATE"}]}'

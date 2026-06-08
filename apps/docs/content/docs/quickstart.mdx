@@ -24,7 +24,17 @@ The script will launch:
 - **Dashboard UI**: `http://localhost:3000`
 - **PostgreSQL Database** & **Redis**
 
-## 2. Configure Your Agent
+> [!NOTE]
+> **Completely Offline**: ZeroTrust Agents is 100% self-hosted. The entire stack runs on your machine or inside your VPC, so your sensitive agent traffic never leaves your network.
+
+## 2. Authentication & API Keys
+
+Since the system is multi-tenant capable, authentication is split into two parts:
+
+1. **The Gateway Secret (`SECRET_KEY`)**: This is the master admin key defined in your `.env` file. You use this to log into the CLI and configure the firewall.
+2. **Tenant API Key (`sk-default`)**: The database is automatically seeded with a "Default Organization" and an API key of `sk-default`. This is the key your *agents* use.
+
+## 3. Configure Your Agent
 
 To route your agent's traffic through the firewall, simply change its `base_url`.
 
@@ -35,7 +45,7 @@ import openai
 
 client = openai.OpenAI(
     base_url="http://localhost:8000/v1",
-    api_key="your-openai-api-key",
+    api_key="sk-default", # Use the Default Tenant API Key here!
     default_headers={"x-agent-id": "Agent-Alpha"}
 )
 
@@ -54,25 +64,25 @@ import anthropic
 
 client = anthropic.Anthropic(
     base_url="http://localhost:8000/v1",
-    api_key="your-anthropic-api-key",
+    api_key="sk-default", # Use the Default Tenant API Key here!
     default_headers={"x-agent-id": "Agent-Beta"}
 )
 ```
 
-## 3. Create a Security Policy
+## 4. Create a Security Policy
 
-By default, the gateway operates on a default-deny principle for all discovered tools. To allow a tool or require human approval, define a security rule in the Dashboard (`http://localhost:3000`).
+By default, the gateway operates on a default-deny principle for all discovered tools. To allow a tool or require human approval, you can define a security rule in the Dashboard (`http://localhost:3000`).
 
-Alternatively, use the API:
+Alternatively, use our powerful Python SDK and CLI tool (`zta`):
 
 ```bash
-curl -X POST http://localhost:8000/api/policies/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "agent_id": "Agent-Alpha",
-    "tool_name": "execute_sql",
-    "action": "require_approval"
-  }'
+pip install zerotrust-agents-sdk
+
+# Login to the CLI using your Gateway Secret (from .env)
+zta login my-super-secret-key --url http://localhost:8000/api
+
+# Apply a pre-built security template instantly
+zta templates apply read_only_sql --agent-id Agent-Alpha
 ```
 
 Now, any time `Agent-Alpha` attempts to execute SQL, the request will be suspended until an administrator clicks **Approve** in the dashboard.

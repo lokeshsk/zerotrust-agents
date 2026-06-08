@@ -2,6 +2,8 @@ import httpx
 from .resources.policies import Policies
 from .resources.logs import Logs
 from .resources.approvals import Approvals
+from .resources.config import Config
+from .resources.templates import Templates
 
 class ZeroTrustAgents:
     """
@@ -19,6 +21,8 @@ class ZeroTrustAgents:
         self.policies = Policies(self)
         self.logs = Logs(self)
         self.approvals = Approvals(self)
+        self.config = Config(self)
+        self.templates = Templates(self)
 
     def close(self):
         self._http_client.close()

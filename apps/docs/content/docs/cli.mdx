@@ -1,0 +1,54 @@
+---
+title: Command Line Interface (CLI)
+description: Manage policies and monitor agents from the terminal.
+---
+
+ZeroTrust Agents provides a powerful CLI tool called `zta` that lets you manage your firewall directly from your terminal.
+
+## Installation
+
+The CLI is bundled with our Python SDK. Install it via pip:
+
+```bash
+pip install zerotrust-agents-sdk
+```
+
+## Authentication
+
+Before you can run commands, you need to authenticate with your Gateway API key.
+
+```bash
+zta login sk-your-master-key --url http://localhost:8001
+```
+
+## Policy Management
+
+You can define your policies as code (in a `policies.yaml` file) and synchronize them with the control plane instantly. This is ideal for CI/CD pipelines.
+
+```bash
+zta sync policies.yaml
+```
+
+## Real-Time Logs
+
+To fetch the most recent audit logs and see what tools your agents are trying to execute:
+
+```bash
+zta logs --limit 50
+```
+
+## Human-in-the-Loop Approvals
+
+You can list all pending Human-in-the-Loop requests that require administrator approval:
+
+```bash
+zta approvals
+```
+
+## Alerting & Webhooks
+
+To configure Slack or Discord to receive a webhook notification whenever an agent requests a Human-in-the-Loop approval:
+
+```bash
+zta config-set hitl_webhook_url https://hooks.slack.com/services/...
+```

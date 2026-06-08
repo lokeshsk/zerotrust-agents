@@ -44,15 +44,24 @@ As AI Agents become increasingly autonomous (executing SQL, calling external API
 - **Semantic DLP**: Scans arguments sent to tools for destructive commands (e.g., `DROP TABLE`) and PII using secondary lightweight local LLMs. Go beyond regex.
 - **Human-in-the-Loop (HITL)**: Suspend high-risk agent operations until a human administrator clicks "Approve" or "Block" in the visual dashboard.
 - **Auto-Discovery Graph**: Automatically maps and visualizes the relationships between your AI agents and the external tools they are trying to use.
-- **Model Context Protocol (MCP)**: Native support for Anthropic's MCP, allowing you to proxy MCP tool calls natively through the gateway.
-- **Python SDK**: Official SDK (`zerotrust-agents-sdk`) using a familiar nested-resource pattern to interact programmatically with the Firewall control plane.
-- **Multi-Tenancy Setup**: The entire architecture is partitioned by `tenant_id` for SaaS deployments.
+- **🔌 Model Context Protocol (MCP)**: Native support for Anthropic's MCP, allowing you to proxy MCP tool calls natively through the gateway.
+- **🐍 Python SDK & CLI (`zta`)**: Official SDK (`zerotrust-agents-sdk`) to interact programmatically with the Firewall control plane, complete with a powerful CLI tool to sync policies, apply predefined security templates (e.g. `safe_github`), and manage approvals.
+- **🔔 Real-time Alerting**: Instantly fire webhooks to Slack or Discord whenever an agent attempts a high-risk action requiring Human-in-the-Loop approval.
+- **👥 Multi-Tenancy Setup**: The entire architecture is partitioned by `tenant_id`. Built from the ground-up to support SaaS deployments or internal enterprise isolation.
+- **🔒 Completely Offline**: Can be run entirely offline or air-gapped without relying on any external cloud backends.
+
+## 🚀 Authentication & API Keys
+
+ZeroTrust Agents is completely self-hosted, meaning you control the keys!
+
+- **The Master Key**: In your `.env` file, there is a `SECRET_KEY`. This is your admin key used to authenticate the `zta` CLI and Python SDK with your local Control Plane.
+- **Agent API Keys**: The system automatically seeds a "Default Organization" with the API key `sk-default`. Your agents use this in their `Authorization: Bearer sk-default` headers when talking to the Gateway.
 
 ## Quickstart
 
 Getting started is easy. You can run the entire Agent Firewall stack (Gateway, API, Database, and Dashboard) locally with a single command.
 
-### 1-Click Launch
+### 1. 1-Click Launch
 We provide an interactive launcher that manages dependencies for you.
 
 ```bash
@@ -64,7 +73,34 @@ chmod +x start.sh
 ./start.sh
 ```
 
-When prompted, select **[1] Docker Compose (Recommended)** to spin up the containerized stack, or **[2] Natively** to run it directly on your machine (Requires Python 3.10+, Node 20+, and PostgreSQL).
+### 2. Install the CLI & SDK
+Manage your firewall directly from the terminal.
+
+```bash
+pip install zerotrust-agents-sdk
+
+# Login using the SECRET_KEY from your .env
+zta login my-super-secret-key --url http://localhost:8001
+```
+
+### 3. Apply a Security Template
+```bash
+# Instantly secure an agent by blocking destructive SQL queries
+zta templates apply read_only_sql --agent-id data-analyst-agent
+```
+
+### 4. Route your Agent Traffic
+In your AI application (e.g. using LiteLLM, LangChain, or OpenAI SDK), point the base URL to the Gateway and pass the default tenant API key:
+
+```python
+from openai import OpenAI
+
+# The firewall acts as a proxy, so you use your Gateway's URL
+client = OpenAI(
+    api_key="sk-default", # The default Tenant API Key
+    base_url="http://localhost:8000/v1"
+)
+```
 
 Once booted, open the Dashboard at: **[http://localhost:3000](http://localhost:3000)** (or your custom `APP_URL`).
 

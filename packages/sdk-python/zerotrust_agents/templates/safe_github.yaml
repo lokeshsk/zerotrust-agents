@@ -1,0 +1,13 @@
+policies:
+  - agent_id: "{{agent_id}}"
+    tool_name: "github_delete_repo"
+    action: "deny"
+  - agent_id: "{{agent_id}}"
+    tool_name: "github_push_commit"
+    action: "require_approval"
+  - agent_id: "{{agent_id}}"
+    tool_name: "github_list_repos"
+    action: "allow"
+  - agent_id: "{{agent_id}}"
+    tool_name: "github_read_file"
+    action: "allow"

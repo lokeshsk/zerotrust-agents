@@ -19,3 +19,15 @@ class Logs:
         )
         resp.raise_for_status()
         return resp.json()
+
+    def list(self, skip: int = 0, limit: int = 100) -> list[dict]:
+        """Fetch recent audit logs."""
+        resp = self._client._http_client.get(
+            f"/logs/?skip={skip}&limit={limit}",
+            headers={
+                "x-gateway-secret": self._client.api_key,
+                "x-tenant-id": self._client.tenant_id
+            }
+        )
+        resp.raise_for_status()
+        return resp.json()

@@ -7,6 +7,8 @@
     "proxies",
     "mcp",
     "policy",
+    "templates",
+    "cli",
     "api",
     "enterprise"
   ]

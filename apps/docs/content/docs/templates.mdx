@@ -1,0 +1,34 @@
+---
+title: Policy Templates
+description: Use pre-built templates for common security scenarios.
+---
+
+Writing security policies from scratch can be daunting. ZeroTrust Agents provides a library of pre-built **Policy Templates** that you can apply instantly using the `zta` CLI tool.
+
+## Available Templates
+
+To see all available built-in templates:
+
+```bash
+zta templates list
+```
+
+### 1. `safe_github`
+Restricts an agent to read-only GitHub operations.
+- **Allows**: `github_list_repos`, `github_read_file`
+- **Requires Approval**: `github_push_commit`
+- **Blocks**: `github_delete_repo`
+
+### 2. `read_only_sql`
+Restricts an agent to `SELECT` operations.
+- **Blocks**: Queries containing `DROP`, `DELETE`, or `TRUNCATE`.
+
+## Applying Templates
+
+To apply a template to a specific agent:
+
+```bash
+zta templates apply safe_github --agent-id my-coding-agent
+```
+
+This will automatically inject the `my-coding-agent` ID into the template and sync the resulting policies with the ZeroTrust Agents control plane.

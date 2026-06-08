@@ -39,3 +39,15 @@ class Approvals:
                 pass
             time.sleep(2)
         return False
+
+    def list(self) -> list[dict]:
+        """Fetch pending HITL approvals."""
+        resp = self._client._http_client.get(
+            "/policies/approvals",
+            headers={
+                "x-gateway-secret": self._client.api_key,
+                "x-tenant-id": self._client.tenant_id
+            }
+        )
+        resp.raise_for_status()
+        return resp.json()

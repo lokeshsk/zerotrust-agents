@@ -86,6 +86,26 @@ export default async function Home() {
             </div>
           </div>
         </div>
+        {/* CLI/SDK Hook Preview */}
+        <div className="max-w-4xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-[#0a0a0a] rounded-xl border border-white/10 shadow-lg p-5">
+            <h3 className="text-white font-semibold mb-3 flex items-center"><svg className="w-5 h-5 mr-2 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> Terminal-Native CLI</h3>
+            <div className="font-mono text-sm text-slate-300 bg-[#111] p-4 rounded-lg border border-white/5">
+              <div className="text-slate-500 mb-1"># Login to your self-hosted API</div>
+              <div className="mb-3"><span className="text-indigo-400">zta</span> login sk-my-secret-key</div>
+              <div className="text-slate-500 mb-1"># Apply a security template</div>
+              <div><span className="text-indigo-400">zta</span> templates apply read_only_sql</div>
+            </div>
+          </div>
+          <div className="bg-[#0a0a0a] rounded-xl border border-white/10 shadow-lg p-5">
+            <h3 className="text-white font-semibold mb-3 flex items-center"><svg className="w-5 h-5 mr-2 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg> Python SDK</h3>
+            <div className="font-mono text-xs text-slate-300 bg-[#111] p-4 rounded-lg border border-white/5">
+              <div className="text-purple-400">from</div> zerotrust_agents <div className="text-purple-400 inline">import</div> ZTAClient<br/><br/>
+              client = ZTAClient(api_key=<span className="text-green-400">"sk-secret"</span>)<br/>
+              client.policies.sync(<span className="text-green-400">"policies.yaml"</span>)
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Features Grid */}
@@ -117,6 +137,31 @@ export default async function Home() {
               </div>
               <h3 className="text-xl font-bold mb-3">Human-in-the-Loop</h3>
               <p className="text-slate-400 leading-relaxed">Set high-risk tools (like executing payments or dropping databases) to instantly suspend the agent and await human administrator approval.</p>
+            </div>
+            
+            {/* New Features: Offline, Multi-tenant, CLI */}
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-colors">
+              <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 border border-blue-500/20">
+                <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" /></svg>
+              </div>
+              <h3 className="text-xl font-bold mb-3">100% Offline & Air-Gapped</h3>
+              <p className="text-slate-400 leading-relaxed">ZeroTrust Agents is completely self-hosted. Your sensitive AI traffic never leaves your VPC. No external cloud backends required.</p>
+            </div>
+            
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-pink-500/30 transition-colors">
+              <div className="w-12 h-12 bg-pink-500/10 rounded-xl flex items-center justify-center mb-6 border border-pink-500/20">
+                <svg className="w-6 h-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+              </div>
+              <h3 className="text-xl font-bold mb-3">Multi-Tenant Architecture</h3>
+              <p className="text-slate-400 leading-relaxed">Built from the ground-up for SaaS. Isolate workloads with unique API keys per tenant, or segment your enterprise by department.</p>
+            </div>
+            
+            <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-colors">
+              <div className="w-12 h-12 bg-cyan-500/10 rounded-xl flex items-center justify-center mb-6 border border-cyan-500/20">
+                <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+              </div>
+              <h3 className="text-xl font-bold mb-3">Developer SDK & CLI</h3>
+              <p className="text-slate-400 leading-relaxed">Treat policies as code. Use the powerful Python SDK and `zta` CLI to version control your rules and automate deployments.</p>
             </div>
           </div>
         </div>

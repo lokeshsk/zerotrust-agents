@@ -1,3 +1,4 @@
+import os
 import httpx
 
 class Policies:
@@ -31,6 +32,24 @@ class Policies:
             "/policies/register",
             json={"tenant_id": self._client.tenant_id, "agent_id": agent_id, "tools": tools},
             headers={"x-gateway-secret": self._client.api_key}
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def sync(self, file_path: str) -> dict:
+        """Sync a local YAML policy file to the control plane."""
+        import io
+        with open(file_path, "rb") as f:
+            content = f.read()
+            
+        files = {"file": (os.path.basename(file_path), io.BytesIO(content), "application/x-yaml")}
+        resp = self._client._http_client.post(
+            "/policies/sync-yaml",
+            files=files,
+            headers={
+                "x-gateway-secret": self._client.api_key,
+                "x-tenant-id": self._client.tenant_id
+            }
         )
         resp.raise_for_status()
         return resp.json()
