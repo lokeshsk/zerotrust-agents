@@ -44,14 +44,14 @@ As AI Agents become increasingly autonomous (executing SQL, calling external API
 - **Semantic DLP**: Scans arguments sent to tools for destructive commands (e.g., `DROP TABLE`) and PII using secondary lightweight local LLMs. Go beyond regex.
 - **Human-in-the-Loop (HITL)**: Suspend high-risk agent operations until a human administrator clicks "Approve" or "Block" in the visual dashboard.
 - **Auto-Discovery Graph**: Automatically maps and visualizes the relationships between your AI agents and the external tools they are trying to use.
-- **🔌 Model Context Protocol (MCP)**: Native support for Anthropic's MCP, allowing you to proxy MCP tool calls natively through the gateway.
-- **🐍 Python SDK & CLI (`zta`)**: Official SDK (`zerotrust-agents-sdk`) to interact programmatically with the Firewall control plane, complete with a powerful CLI tool to sync policies, apply predefined security templates (e.g. `safe_github`), and manage approvals.
-- **🔔 Real-time Alerting**: Instantly fire webhooks to Slack or Discord whenever an agent attempts a high-risk action requiring Human-in-the-Loop approval.
-- **👥 Multi-Tenancy Setup**: The entire architecture is partitioned by `tenant_id`. Built from the ground-up to support SaaS deployments or internal enterprise isolation.
-- **🛡️ Interactive Security Labs**: Includes a sandboxed, containerized environment with automated Red-Teaming scripts to safely test prompt injections and data exfiltration evasions locally!
-- **🔒 Completely Offline**: Can be run entirely offline or air-gapped without relying on any external cloud backends.
+- **Model Context Protocol (MCP)**: Native support for Anthropic's MCP, allowing you to proxy MCP tool calls natively through the gateway.
+- **Python SDK & CLI (`zta`)**: Official SDK (`zerotrust-agents-sdk`) to interact programmatically with the Firewall control plane, complete with a powerful CLI tool to sync policies, apply predefined security templates (e.g. `safe_github`), and manage approvals.
+- **Real-time Alerts**: Instantly fire webhooks to Slack or Discord whenever an agent attempts a high-risk action requiring Human-in-the-Loop approval.
+- **Multi-Tenancy Setup**: The entire architecture is partitioned by `tenant_id`. Built from the ground-up to support SaaS deployments or internal enterprise isolation.
+- **Interactive Security Labs**: Includes a sandboxed, containerized environment with automated Red-Teaming scripts to safely test prompt injections and data exfiltration evasions locally!
+- **Completely Offline**: Can be run entirely offline or air-gapped without relying on any external cloud backends.
 
-## 🚀 Authentication & API Keys
+## Authentication & API Keys
 
 ZeroTrust Agents is completely self-hosted, meaning you control the keys!
 
