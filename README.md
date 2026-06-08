@@ -34,10 +34,10 @@ Example:
 
 ---
 
-## Why ZeroTrust Agents?
+## Why ZeroTrust Agents (ZTA)?
 As AI Agents become increasingly autonomous (executing SQL, calling external APIs, writing to databases), organizations need a centralized security layer to prevent rogue actions, ensure compliance, and monitor AI behavior in real time.
 
-**ZeroTrust Agents** acts as an enterprise-grade API Gateway that sits securely between your AI Agent and its LLM provider (OpenAI, Anthropic, Gemini, etc.). It intercepts the agent's attempts to use tools and evaluates those actions against a strict, zero-trust security policy engine before allowing them to execute.
+**ZeroTrust Agents (ZTA)** acts as an enterprise-grade API Gateway that sits securely between your AI Agent and its LLM provider (OpenAI, Anthropic, Gemini, etc.). It intercepts the agent's attempts to use tools and evaluates those actions against a strict, zero-trust security policy engine before allowing them to execute.
 
 ## Features
 - **LiteLLM Proxy Engine**: Agnostic proxy that intercepts traffic and forces LLMs to adhere to predefined tool-use policies. We support the `OpenAI`, `Anthropic`, and `Gemini` tool-use specification formats natively.
@@ -102,7 +102,7 @@ graph TD
 
 ## MCP (Model Context Protocol)
 
-Agent Firewall natively supports Anthropic's **Model Context Protocol (MCP)**.
+ZTA natively supports Anthropic's **Model Context Protocol (MCP)**.
 Instead of giving LLMs unmitigated direct access to your local filesystem or databases, you can route your MCP connections through the Firewall.
 The Gateway intercepts the JSON-RPC messages, inspects the `CallToolRequest`, and blocks actions like `write_file` or `execute_query` based on your policies, all while keeping the connection stateful.
 
