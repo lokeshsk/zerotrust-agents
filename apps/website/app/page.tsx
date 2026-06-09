@@ -128,8 +128,8 @@ export default async function Home() {
               <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-6 border border-emerald-500/20">
                 <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
-              <h3 className="text-xl font-bold mb-3">Semantic DLP</h3>
-              <p className="text-slate-400 leading-relaxed">Go beyond regex. Use lightweight local LLMs to scan JSON tool arguments for malicious intent, PII leaks, and prompt injections.</p>
+              <h3 className="text-xl font-bold mb-3">Semantic DLP & Secret Scanning</h3>
+              <p className="text-slate-400 leading-relaxed">Go beyond regex. Use lightweight local LLMs to scan JSON tool arguments for malicious intent, PII, and leaked API Keys/Secrets.</p>
             </div>
             <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-amber-500/30 transition-colors">
               <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center mb-6 border border-amber-500/20">
@@ -153,7 +153,7 @@ export default async function Home() {
                 <svg className="w-6 h-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
               </div>
               <h3 className="text-xl font-bold mb-3">Multi-Tenant Architecture</h3>
-              <p className="text-slate-400 leading-relaxed">Built from the ground-up for SaaS. Isolate workloads with unique API keys per tenant, or segment your enterprise by department.</p>
+              <p className="text-slate-400 leading-relaxed">Built from the ground-up for SaaS. Isolate workloads with unique API keys per tenant. Available in the Open-Source core!</p>
             </div>
             
             <div className="bg-[#111] p-8 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-colors">
@@ -199,7 +199,7 @@ export default async function Home() {
               <ul className="space-y-4 mb-10">
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> API Gateway Proxy</li>
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Master Key Authentication</li>
-                <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Basic Telemetry Dashboard</li>
+                <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Multi-Tenant Workspaces</li>
                 <li className="flex items-center text-slate-300"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Prometheus Metrics</li>
               </ul>
               <a href="https://github.com/lokeshsk/zerotrust-agents" className="block w-full py-3 bg-white/5 hover:bg-white/10 text-center rounded-xl font-semibold transition-colors cursor-pointer">Clone Repository</a>
@@ -212,8 +212,8 @@ export default async function Home() {
               <p className="text-indigo-200 mb-8 h-12">Advanced controls and scalability for mission-critical AI applications.</p>
               <ul className="space-y-4 mb-10">
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Everything in Community</li>
-                <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Multi-Tenant Workspaces & Granular RBAC</li>
-                <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Active Directory & Auth0 SSO</li>
+                <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Active Data Redaction (Masking)</li>
+                <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Granular RBAC & Active Directory SSO</li>
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Agent-Level Hard Budgets & Cost Controls</li>
                 <li className="flex items-center text-white"><svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> SOC2 Immutable Admin Audit Trails</li>
               </ul>

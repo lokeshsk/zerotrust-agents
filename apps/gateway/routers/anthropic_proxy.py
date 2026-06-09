@@ -167,7 +167,16 @@ async def messages_proxy(request: Request):
                             tool_name = tc["name"]
                             arguments = tc["input_str"]
                             
-                            dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                            ssn_pattern = re.compile(r'\b\d{3}-\d{2}-\d{4}\b')
+                            if ssn_pattern.search(arguments):
+                                dlp_error = "Semantic DLP Block: Sensitive PII (SSN) detected in payload."
+                            else:
+                                api_key_pattern = re.compile(r'\b(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{48})\b')
+                                if api_key_pattern.search(arguments):
+                                    dlp_error = "Semantic DLP Block: API Key or Secret detected in payload."
+                                else:
+                                    dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                            
                             is_allowed = not bool(dlp_error)
                             block_reason = dlp_error
                             
@@ -246,7 +255,16 @@ async def messages_proxy(request: Request):
                 arguments = tc["function"]["arguments"]
                 
                 # Policy check
-                dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                ssn_pattern = re.compile(r'\b\d{3}-\d{2}-\d{4}\b')
+                if ssn_pattern.search(arguments):
+                    dlp_error = "Semantic DLP Block: Sensitive PII (SSN) detected in payload."
+                else:
+                    api_key_pattern = re.compile(r'\b(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{48})\b')
+                    if api_key_pattern.search(arguments):
+                        dlp_error = "Semantic DLP Block: API Key or Secret detected in payload."
+                    else:
+                        dlp_error = await semantic_dlp_check(arguments, tenant_id)
+                
                 if dlp_error:
                     is_allowed = False
                     block_reason = dlp_error

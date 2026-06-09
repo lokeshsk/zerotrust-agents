@@ -98,11 +98,11 @@ async def semantic_dlp_check(arguments: str, tenant_id: str) -> str:
             sys_prompt = "You are a Zero Trust Security Analyzer. Your job is to inspect payloads sent to tools by AI agents. You must answer ONLY with 'BLOCK' or 'ALLOW'."
             
             if sensitivity == "high":
-                user_prompt = f"Evaluate the following payload for ANY sensitive data (PII, SSN, Credit Cards, Internal IP addresses) OR destructive commands (DROP, DELETE, UPDATE without WHERE).\nPayload: {arguments}\nStrictly BLOCK if there is even a slight risk."
+                user_prompt = f"Evaluate the following payload for ANY sensitive data (PII, SSN, Credit Cards, Internal IP addresses, API Keys, Secrets, Passwords) OR destructive commands (DROP, DELETE, UPDATE without WHERE).\nPayload: {arguments}\nStrictly BLOCK if there is even a slight risk."
             elif sensitivity == "medium":
-                user_prompt = f"Evaluate the following payload for clear PII (SSN, Credit Cards) or highly destructive commands (DROP TABLE, TRUNCATE).\nPayload: {arguments}\nBLOCK only if explicitly dangerous."
+                user_prompt = f"Evaluate the following payload for clear PII (SSN, Credit Cards), leaked API Keys/Secrets, or highly destructive commands (DROP TABLE, TRUNCATE).\nPayload: {arguments}\nBLOCK only if explicitly dangerous or sensitive."
             else: # low
-                user_prompt = f"Evaluate the following payload ONLY for highly destructive database operations (DROP TABLE, TRUNCATE). Ignore PII.\nPayload: {arguments}\nBLOCK only if it's clearly dropping a table."
+                user_prompt = f"Evaluate the following payload ONLY for highly destructive database operations (DROP TABLE, TRUNCATE) or clear AWS/OpenAI API Keys. Ignore generic PII.\nPayload: {arguments}\nBLOCK only if it's clearly dropping a table or leaking a high-value secret."
 
             # Prepare kwargs for litellm
             kwargs = {
@@ -135,6 +135,10 @@ async def semantic_dlp_check(arguments: str, tenant_id: str) -> str:
     ssn_pattern = re.compile(r'\b\d{3}-\d{2}-\d{4}\b')
     if ssn_pattern.search(arguments):
         return "Semantic DLP Block: Sensitive PII (SSN) detected in payload."
+        
+    api_key_pattern = re.compile(r'\b(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{48})\b')
+    if api_key_pattern.search(arguments):
+        return "Semantic DLP Block: API Key or Secret detected in payload."
         
     return None
 

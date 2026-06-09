@@ -16,8 +16,14 @@ The Enterprise Edition completely disables the local "master key" authentication
 
 Instead of simple "admin" or "developer" checks, ZTA EE implements a fine-grained permission engine.
 
-- Custom Roles: You can map specific actions (like `policies:write`, `logs:read`, `billing:write`, `settings:write`) to custom roles.
-- Cross-Tenant Isolation: Roles are strictly bound to a `tenant_id`, allowing a single deployment to securely serve multiple distinct organizations or internal teams.
+- **Custom Roles**: You can map specific actions (like `policies:write`, `logs:read`, `billing:write`, `settings:write`) to custom roles.
+- **Cross-Tenant Isolation**: While basic multi-tenancy is available in the Open Source core, EE allows you to strictly bind Granular Roles to a `tenant_id`, allowing a single deployment to securely serve multiple distinct organizations or internal teams with different security privileges.
+
+## Active Data Redaction (Masking)
+
+Instead of strictly *blocking* an agent payload that contains an SSN or an API Key, the Enterprise Edition can actively redact and mask the data in transit.
+
+- **Non-Disruptive Security**: If an agent attempts to leak `AKIAIOSFODNN7EXAMPLE`, the gateway replaces it with `***-REDACTED-***` and allows the request to proceed. This prevents the agent's workflow from breaking while completely neutralizing the threat.
 
 ## Advanced Token Billing & Agent Budgets
 

@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/lokeshsk/zerotrust-agents/stargazers"><img src="https://img.shields.io/github/stars/lokeshsk/zerotrust-agents?style=for-the-badge&color=yellow" alt="Stars" /></a>
-  <a href="https://github.com/lokeshsk/zerotrust-agents/blob/main/LICENSE"><img src="https://img.shields.io/github/license/lokeshsk/zerotrust-agents?style=for-the-badge&color=blue" alt="License" /></a>
+  <a href="https://github.com/lokeshsk/zerotrust-agents/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="License" /></a>
   <a href="https://zerotrust-agents.com"><img src="https://img.shields.io/website?url=https%3A%2F%2Fzerotrust-agents.com&style=for-the-badge&label=Website" alt="Website" /></a>
   <a href="https://docs.zerotrust-agents.com"><img src="https://img.shields.io/badge/Docs-Live-green?style=for-the-badge" alt="Docs" /></a>
 </p>
@@ -41,7 +41,7 @@ As AI Agents become increasingly autonomous (executing SQL, calling external API
 
 ## Features
 - **LiteLLM Proxy Engine**: Agnostic proxy that intercepts traffic and forces LLMs to adhere to predefined tool-use policies. We support the `OpenAI`, `Anthropic`, and `Gemini` tool-use specification formats natively.
-- **Semantic DLP**: Scans arguments sent to tools for destructive commands (e.g., `DROP TABLE`) and PII using secondary lightweight local LLMs. Go beyond regex.
+- **Semantic DLP & Secret Scanning**: Scans arguments sent to tools for destructive commands (e.g., `DROP TABLE`), PII, and leaked API Keys/Secrets using secondary lightweight local LLMs and Regex fallback.
 - **Human-in-the-Loop (HITL)**: Suspend high-risk agent operations until a human administrator clicks "Approve" or "Block" in the visual dashboard.
 - **Auto-Discovery Graph**: Automatically maps and visualizes the relationships between your AI agents and the external tools they are trying to use.
 - **Model Context Protocol (MCP)**: Native support for Anthropic's MCP, allowing you to proxy MCP tool calls natively through the gateway.
@@ -154,10 +154,11 @@ turbo run dev --filter=docs
 ## Open Source vs Enterprise Edition
 ZeroTrust Agents (ZTA) operates on an Open Core model. 
 
-* **Community Edition (Open Source)**: Includes the core firewall proxy, semantic DLP, basic HITL flows, and master key authentication.
-* **Enterprise Edition (EE)**: Distributed privately for enterprise customers. Unlocks:
+* **Community Edition (Open Source - Apache 2.0)**: Includes the core firewall proxy, semantic DLP, basic HITL flows, multi-tenant workspaces, and master key authentication.
+* **Enterprise Edition (EE - Commercial)**: Distributed privately for enterprise customers. Unlocks:
   - **Auth0 / Active Directory SSO**: Centralized identity with Just-in-Time (JIT) provisioning.
-  - **Multi-Tenant Workspaces & Granular RBAC**: Isolate teams and enforce precise permissions (e.g., `policies:write`).
+  - **Granular RBAC**: Enforce precise permissions (e.g., `policies:write`) within workspaces.
+  - **Active Data Redaction (Masking)**: Automatically mask SSNs and API keys in tool payloads without breaking agent flows.
   - **Advanced SIEM Webhooks**: Forward structured logs to Splunk or Datadog.
   - **Hard Budget & Cost Controls**: Set granular financial limits (in cents) per agent. Automatically block LLM requests with `402 Payment Required` when budgets are exhausted.
   - **SOC2 Audit Trails**: Immutable before-and-after snapshots of all administrative actions, easily accessible via the API or CLI (`zta audit-trail`).
