@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/lokeshsk/zerotrust-agents/stargazers"><img src="https://img.shields.io/github/stars/lokeshsk/zerotrust-agents?style=for-the-badge&color=yellow" alt="Stars" /></a>
-  <a href="https://github.com/lokeshsk/zerotrust-agents/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge" alt="License" /></a>
+  <a href="https://github.com/lokeshsk/zerotrust-agents/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg?style=for-the-badge" alt="License" /></a>
   <a href="https://zerotrust-agents.com"><img src="https://img.shields.io/website?url=https%3A%2F%2Fzerotrust-agents.com&style=for-the-badge&label=Website" alt="Website" /></a>
   <a href="https://docs.zerotrust-agents.com"><img src="https://img.shields.io/badge/Docs-Live-green?style=for-the-badge" alt="Docs" /></a>
 </p>
@@ -154,7 +154,7 @@ turbo run dev --filter=docs
 ## Open Source vs Enterprise Edition
 ZeroTrust Agents (ZTA) operates on an Open Core model. 
 
-* **Community Edition (Open Source - Apache 2.0)**: Includes the core firewall proxy, semantic DLP, basic HITL flows, multi-tenant workspaces, and master key authentication.
+* **Community Edition (Open Source - AGPLv3)**: Includes the core firewall proxy, semantic DLP, basic HITL flows, multi-tenant workspaces, and master key authentication.
 * **Enterprise Edition (EE - Commercial)**: Distributed privately for enterprise customers. Unlocks:
   - **Auth0 / Active Directory SSO**: Centralized identity with Just-in-Time (JIT) provisioning.
   - **Granular RBAC**: Enforce precise permissions (e.g., `policies:write`) within workspaces.
